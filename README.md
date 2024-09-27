@@ -227,7 +227,7 @@ This setting changes the text at the beginning of an error message when an inval
 `authenticationErrorMsg: `
 ```json
 {
-  "message": "Access Denied. Must pass a valid API Token header using either X-API-TOKEN: $token or Authorization: Bearer $token",
+  "message": "Access Denied. Provide a valid API Token header using either X-API-TOKEN: $token or Authorization: Bearer $token",
   "status_code": 403,
   "timestamp": "Fri Sep 27 03:24:27 UTC 2024"
 }
@@ -238,7 +238,7 @@ This setting changes the text at the beginning of an error message when an inval
 `authenticationErrorMsg: "You cannot access this API"`
 ```json
 {
-  "message": "You cannot access this API. Must pass a valid API Token header using either X-API-TOKEN: $token or Authorization: Bearer $token",
+  "message": "You cannot access this API. Provide a valid API Token header using either X-API-TOKEN: $token or Authorization: Bearer $token",
   "status_code": 403,
   "timestamp": "Fri Sep 27 03:24:27 UTC 2024"
 }
@@ -255,7 +255,7 @@ This setting changes how error messages are displayed to a user who doesn't prov
 `removeTokenNameOnFailure: true`
 ```json
 {
-  "message": "Access Denied. Must pass a valid API Token header using either X-API-TOKEN: $token or Authorization: Bearer $token",
+  "message": "Access Denied. Provide a valid API Token header using either X-API-TOKEN: $token or Authorization: Bearer $token",
   "status_code": 403,
   "timestamp": "1727432498"
 }
@@ -283,7 +283,7 @@ This setting changes how the date / time will be displayed in your API callback 
 `timestampUnix: true`
 ```json
 {
-  "message": "Access Denied. Must pass a valid API Token header using either X-API-TOKEN: $token or Authorization: Bearer $token",
+  "message": "Access Denied. Provide a valid API Token header using either X-API-TOKEN: $token or Authorization: Bearer $token",
   "status_code": 403,
   "timestamp": "1727432498"
 }
@@ -294,7 +294,7 @@ This setting changes how the date / time will be displayed in your API callback 
 `timestampUnix: false`
 ```json
 {
-  "message": "Access Denied. Must pass a valid API Token header using either X-API-TOKEN: $token or Authorization: Bearer $token",
+  "message": "Access Denied. Provide a valid API Token header using either X-API-TOKEN: $token or Authorization: Bearer $token",
   "status_code": 403,
   "timestamp": "Fri Sep 27 03:24:27 UTC 2024"
 }
