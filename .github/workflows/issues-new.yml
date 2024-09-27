@@ -100,7 +100,6 @@ env:
         { "name": "› Enterprise",                 "color": "11447a", "description": "Issues about collaboration, administration, and so on" },
         { "name": "› Hardware",                   "color": "5a7503", "description": "YubiKey, other tokens, biometrics" },
         { "name": "› Import/Export",              "color": "F5FFCC", "description": "Import from and export to different file formats" },
-        { "name": "› kdbxweb",                    "color": "eb6420", "description": "Core library" },
         { "name": "› Performance",                "color": "006b75", "description": "Web and desktop performance issues" },
         { "name": "› Plugin Request",             "color": "FCE9CA", "description": "Requested changes should be implemented as a plugin" },
         { "name": "› Security",                   "color": "F75D39", "description": "Security issues" },
