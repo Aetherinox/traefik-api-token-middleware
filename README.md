@@ -50,12 +50,21 @@ This Traefik middleware allows you to secure certain routes behind a request hea
     - [Kubernetes Custom Resource Definition](#kubernetes-custom-resource-definition)
 - [Parameters](#parameters)
   - [authenticationErrorMsg](#authenticationerrormsg)
+  - [removeTokenNameOnFailure](#removetokennameonfailure)
+  - [timestampUnix](#timestampunix)
 - [Usage](#usage)
 - [Browser Plugins](#browser-plugins)
   - [Firefox](#firefox)
     - [Extension: Header Editor](#extension-header-editor)
     - [Extension: Modify Header Value](#extension-modify-header-value)
 - [Verifying Modified Headers](#verifying-modified-headers)
+- [Local Install](#local-install)
+  - [Static File](#static-file-1)
+    - [File (YAML)](#file-yaml-2)
+    - [File (TOML)](#file-toml-2)
+  - [Dynamic File](#dynamic-file-1)
+    - [File (YAML)](#file-yaml-3)
+    - [File (TOML)](#file-toml-3)
 - [Contributors ✨](#contributors-)
 
 <br />
@@ -124,9 +133,12 @@ http:
         traefik-api-token-middleware:
           authenticationHeader: true
           authenticationHeaderName: X-API-TOKEN
+          authenticationErrorMsg: "Invalid token"
           bearerHeader: true
           bearerHeaderName: Authorization
           removeHeadersOnSuccess: true
+          removeTokenNameOnFailure: false
+          timestampUnix: false
           tokens:
             - your-api-token
 ```
@@ -144,9 +156,12 @@ http:
         [http.middlewares.api-token.plugin.traefik-api-token-middleware]
           authenticationHeader = true
           authenticationHeaderName = "X-API-TOKEN"
+          authenticationErrorMsg = "Invalid token"
           bearerHeader = true
           bearerHeaderName = "Authorization"
           removeHeadersOnSuccess = true
+          removeTokenNameOnFailure = false
+          timestampUnix = false
           tokens = ["your-api-token"]
 ```
 
@@ -165,9 +180,12 @@ spec:
     traefik-api-token-middleware:
       authenticationHeader: true
       authenticationHeaderName: X-API-TOKEN
+      authenticationErrorMsg: "Invalid token"
       bearerHeader: true
       bearerHeaderName: Authorization
       removeHeadersOnSuccess: true
+      removeTokenNameOnFailure: false
+      timestampUnix: false
       tokens:
         - your-api-token
 ```
@@ -183,19 +201,98 @@ This plugin accepts the following parameters:
 
 | Parameter | Description | Default | Type | Required |
 | --- | --- | --- | --- | --- |
-| `authenticationHeader` | Pass token using Authentication Header | true | bool | | 
-| `authenticationHeaderName` | Authentication header name | 'X-API-TOKEN' | string | | 
-| `authenticationErrorMsg` | Error message to display on unsuccessful authentication | 'Access Denied' | string | |
-| `bearerHeader` | Pass token using Authentication Header Bearer Key | true | bool | |
-| `bearerHeaderName` | Authentication bearer header name | 'Authorization' | string | |
-| `removeHeadersOnSuccess` | If `true`; remove header on successful authentication | true | bool | |
-| `noPublicTokenOnError` | Don't display name of token in unsuccessful error message | false | bool | |
-| `timestampUnix` | Display datetime in Unix timestamp instead of UnixDate | false | bool | |
+| `tokens` | List of API tokens | [] | <sub>[]string</sub> | ✔️ Required |
+| `authenticationHeader` | Pass token using Authentication Header | true | <sub>bool</sub> | ⚠️ Note | 
+| `authenticationHeaderName` | Authentication header name | 'X-API-TOKEN' | <sub>string</sub> | ⭕ Optional | 
+| `authenticationErrorMsg` | Error message to display on unsuccessful authentication | 'Access Denied' | <sub>string</sub> | ⭕ Optional |
+| `bearerHeader` | Pass token using Authentication Header Bearer Key | true | <sub>bool</sub> | ⚠️ Note |
+| `bearerHeaderName` | Authentication bearer header name | 'Authorization' | <sub>string</sub> | ⭕ Optional |
+| `removeHeadersOnSuccess` | If `true`; remove header on successful authentication | true | <sub>bool</sub> | ⭕ Optional |
+| `removeTokenNameOnFailure` | Don't display name of token in unsuccessful error message | false | <sub>bool</sub> | ⭕ Optional |
+| `timestampUnix` | Display datetime in Unix timestamp instead of UnixDate | false | <sub>bool</sub> | ⭕ Optional |
 
 <br />
 
 ### authenticationErrorMsg
+This setting changes the text at the beginning of an error message when an invalid token is specified.
+
+<br />
+
+`authenticationErrorMsg: `
+```json
+{
+  "message": "Access Denied. Must pass a valid API Token header using either X-API-TOKEN: $token or Authorization: Bearer $key",
+  "status_code": 403,
+  "timestamp": "Fri Sep 27 03:24:27 UTC 2024"
+}
+```
+
+<br />
+
+`authenticationErrorMsg: "You cannot access this API"`
+```json
+{
+  "message": "You cannot access this API. Must pass a valid API Token header using either X-API-TOKEN: $token or Authorization: Bearer $key",
+  "status_code": 403,
+  "timestamp": "Fri Sep 27 03:24:27 UTC 2024"
+}
+```
+
+<br />
+<br />
+
+### removeTokenNameOnFailure
 This setting changes how error messages are displayed to a user who doesn't provide a correct token. If `enabled`, it will keep the name of your token private.
+
+<br />
+
+`removeTokenNameOnFailure: true`
+```json
+{
+  "message": "Access Denied. Must pass a valid API Token header using either X-API-TOKEN: $token or Authorization: Bearer $key",
+  "status_code": 403,
+  "timestamp": "1727432498"
+}
+```
+
+<br />
+
+`removeTokenNameOnFailure: false`
+```json
+{
+  "message": "Access Denied.",
+  "status_code": 403,
+  "timestamp": "1727432498"
+}
+```
+
+<br />
+<br />
+
+### timestampUnix
+This setting changes how the date / time will be displayed in your API callback / output.
+
+<br />
+
+`timestampUnix: true`
+```json
+{
+  "message": "Access Denied. Must pass a valid API Token header using either X-API-TOKEN: $token or Authorization: Bearer $key",
+  "status_code": 403,
+  "timestamp": "1727432498"
+}
+```
+
+<br />
+
+`timestampUnix: false`
+```json
+{
+  "message": "Access Denied. Must pass a valid API Token header using either X-API-TOKEN: $token or Authorization: Bearer $key",
+  "status_code": 403,
+  "timestamp": "Fri Sep 27 03:24:27 UTC 2024"
+}
+```
 
 <br />
 
@@ -296,6 +393,119 @@ If you now go to the subdomain and open the browser developer tools, and on the 
 
 <br />
 
+---
+
+<br />
+
+## Local Install
+Traefik comes with the ability to install this plugin locally without fetching it from Github. 
+
+<br />
+
+Download a local copy of this plugin to your server within your Traefik installation folder.
+```shell
+git clone https://github.com/Aetherinox/traefik-api-token-middleware.git
+```
+
+<br />
+
+If you are running **Docker**, you need to mount a new volume:
+
+<br />
+
+> [!WARNING]
+> The path to the plugin is **case sensitive**, do not change the casing of the folders, or the plugin will fail to load.
+
+<br />
+
+```yml
+services:
+    traefik:
+        container_name: traefik
+        image: traefik:latest
+        restart: unless-stopped
+        volumes:
+            - ./traefik-api-token-middleware:/plugins-local/src/github.com/Aetherinox/traefik-api-token-middleware/
+```
+
+<br />
+
+### Static File
+Open your **Traefik Static File** and change `plugins` to `localPlugins`.
+
+<br />
+
+#### File (YAML)
+
+```yaml
+# Static configuration
+experimental:
+  localPlugins:
+    traefik-api-token-middleware:
+      moduleName: "github.com/Aetherinox/traefik-api-token-middleware"
+      version: "v0.1.0"
+```
+
+<br />
+
+#### File (TOML)
+
+```toml
+# Static configuration
+[experimental.localPlugins.traefik-api-token-middleware]
+  moduleName = "github.com/Aetherinox/traefik-api-token-middleware"
+  version = "v0.1.0"
+```
+
+<br />
+
+### Dynamic File
+For local installation, your dynamic file will contain the same contents as it would if you installed the plugin normally.
+
+<br />
+
+#### File (YAML)
+
+```yaml
+# Dynamic configuration
+http:
+  middlewares:
+    api-token:
+      plugin:
+        traefik-api-token-middleware:
+          authenticationHeader: true
+          authenticationHeaderName: X-API-TOKEN
+          authenticationErrorMsg: "Invalid token"
+          bearerHeader: true
+          bearerHeaderName: Authorization
+          removeHeadersOnSuccess: true
+          removeTokenNameOnFailure: false
+          timestampUnix: false
+          tokens:
+            - your-api-token
+```
+
+<br />
+
+#### File (TOML)
+
+```toml
+# Dynamic configuration
+[http]
+  [http.middlewares]
+    [http.middlewares.api-token]
+      [http.middlewares.api-token.plugin]
+        [http.middlewares.api-token.plugin.traefik-api-token-middleware]
+          authenticationHeader = true
+          authenticationHeaderName = "X-API-TOKEN"
+          authenticationErrorMsg = "Invalid token"
+          bearerHeader = true
+          bearerHeaderName = "Authorization"
+          removeHeadersOnSuccess = true
+          removeTokenNameOnFailure = false
+          timestampUnix = false
+          tokens = ["your-api-token"]
+```
 
 
 <br />

@@ -30,7 +30,7 @@ type Config struct {
 	BearerHeaderName         	string   `json:"bearerHeaderName,omitempty"`
 	Tokens                     	[]string `json:"tokens,omitempty"`
 	RemoveHeadersOnSuccess   	bool     `json:"removeHeadersOnSuccess,omitempty"`
-	NoPublicTokenOnError   		bool     `json:"noPublicTokenOnError,omitempty"`
+	RemoveTokenNameOnFailure	bool     `json:"removeTokenNameOnError,omitempty"`
 	TimestampUnix     			bool     `json:"timestampUnix,omitempty"`
 }
 
@@ -57,7 +57,7 @@ func CreateConfig() *Config {
 		BearerHeaderName:         	"Authorization",
 		Tokens:                  	make([]string, 0),
 		RemoveHeadersOnSuccess:   	true,
-		NoPublicTokenOnError:   	false,
+		RemoveTokenNameOnFailure:	false,
 		TimestampUnix:				false,
 	}
 }
@@ -71,7 +71,7 @@ type KeyAuth struct {
 	bearerHeaderName         	string
 	tokens                     	[]string
 	removeHeadersOnSuccess   	bool
-	noPublicTokenOnError   		bool
+	removeTokenNameOnFailure	bool
 	timestampUnix				bool
 }
 
@@ -107,7 +107,7 @@ func New(ctx context.Context, next http.Handler, config *Config, name string) (h
 		bearerHeaderName:         	config.BearerHeaderName,
 		tokens:                  	config.Tokens,
 		removeHeadersOnSuccess:   	config.RemoveHeadersOnSuccess,
-		noPublicTokenOnError:   	config.NoPublicTokenOnError,
+		removeTokenNameOnFailure:	config.RemoveTokenNameOnFailure,
 		timestampUnix:   			config.TimestampUnix,
 	}, nil
 }
@@ -238,7 +238,7 @@ func (ka *KeyAuth) ServeHTTP(rw http.ResponseWriter, req *http.Request) {
 
 	var response Response
 	if ka.authenticationHeader && ka.bearerHeader {
-		if !ka.noPublicTokenOnError {
+		if !ka.removeTokenNameOnFailure {
 			output = fmt.Sprintf(output + ". Must pass a valid API Token header using either %s: $token or %s: Bearer $key", ka.authenticationHeaderName, ka.bearerHeaderName)
 		}
 
@@ -248,7 +248,7 @@ func (ka *KeyAuth) ServeHTTP(rw http.ResponseWriter, req *http.Request) {
 			Timestamp: 		now,
 		}
 	} else if ka.authenticationHeader && !ka.bearerHeader {
-		if !ka.noPublicTokenOnError {
+		if !ka.removeTokenNameOnFailure {
 			output = fmt.Sprintf(output + ". Must pass a valid API Token header using %s: $token", ka.authenticationHeaderName)
 		}
 
@@ -258,7 +258,7 @@ func (ka *KeyAuth) ServeHTTP(rw http.ResponseWriter, req *http.Request) {
 			Timestamp: 		now,
 		}
 	} else if !ka.authenticationHeader && ka.bearerHeader {
-		if !ka.noPublicTokenOnError {
+		if !ka.removeTokenNameOnFailure {
 			output = fmt.Sprintf(output + ". Must pass a valid API Token header using %s: Bearer $token", ka.bearerHeaderName)
 		}
 
