@@ -381,7 +381,7 @@ Once you install the browser extension above, open the **settings**.
 
 <br />
 
-<p align="center"><img style="width: 50%;text-align: center;" src="https://raw.githubusercontent.com/Aetherinox/traefik-api-token-middleware/refs/heads/main/docs/img/verify-headers/1.gif"></p>
+<p align="center"><img style="width: 50%;text-align: center;" src="https://raw.githubusercontent.com/Aetherinox/traefik-api-token-middleware/refs/heads/main/docs/img/browser-plugins/1.gif"></p>
 
 <br />
 
@@ -397,7 +397,7 @@ Create a new rule
 
 <br />
 
-<p align="center"><img style="width: 80%;text-align: center;" src="https://github.com/user-attachments/assets/313a6cfd-6416-4fc4-acd5-3cfe2a44c502"></p>
+<p align="center"><img style="width: 80%;text-align: center;" src="https://raw.githubusercontent.com/Aetherinox/traefik-api-token-middleware/refs/heads/main/docs/img/browser-plugins/2.png"></p>
 
 <br />
 
@@ -415,7 +415,7 @@ Once you install the browser extension above, open the **settings**.
 
 <br />
 
-<p align="center"><img style="width: 50%;text-align: center;" src="https://github.com/user-attachments/assets/50d4d8fb-aee1-4aa8-8f67-db645dd2909d"></p>
+<p align="center"><img style="width: 50%;text-align: center;" src="https://raw.githubusercontent.com/Aetherinox/traefik-api-token-middleware/refs/heads/main/docs/img/browser-plugins/3.gif"></p>
 
 <br />
 
@@ -423,7 +423,7 @@ You need to add a new rule which injects your modified header into the specified
 
 <br />
 
-<p align="center"><img style="width: 100%;text-align: center;" src="https://github.com/user-attachments/assets/df389731-0bcd-4b39-a143-9ba49cef22f4"></p>
+<p align="center"><img style="width: 100%;text-align: center;" src="https://raw.githubusercontent.com/Aetherinox/traefik-api-token-middleware/refs/heads/main/docs/img/browser-plugins/4.png"></p>
 
 <br />
 
@@ -450,7 +450,7 @@ A box should appear either on the right or bottom. Within the **Console** tab, e
 
 <br />
 
-<p align="center"><img style="width: 100%;text-align: center;" src="https://github.com/user-attachments/assets/6472e1e5-a232-42a4-89b7-ef233e40a680"></p>
+<p align="center"><img style="width: 100%;text-align: center;" src="https://raw.githubusercontent.com/Aetherinox/traefik-api-token-middleware/refs/heads/main/docs/img/verify-headers/1.png"></p>
 
 <br />
 
@@ -462,7 +462,7 @@ Next, refresh your browser's page.
 
 <br />
 
-<p align="center"><img style="width: 100%;text-align: center;" src="https://github.com/user-attachments/assets/39be9dd5-cce8-4995-81b5-4cfbaa21d793"></p>
+<p align="center"><img style="width: 100%;text-align: center;" src="https://raw.githubusercontent.com/Aetherinox/traefik-api-token-middleware/refs/heads/main/docs/img/verify-headers/2.png"></p>
 
 <br />
 
@@ -483,7 +483,7 @@ Typically with a `403` status, you can click the box that contains the status co
 
 <br />
 
-<p align="center"><img style="width: 100%;text-align: center;" src="https://github.com/user-attachments/assets/2de09e61-3b2a-45f7-8434-9b861ed2320f"></p>
+<p align="center"><img style="width: 100%;text-align: center;" src="https://raw.githubusercontent.com/Aetherinox/traefik-api-token-middleware/refs/heads/main/docs/img/verify-headers/3.png"></p>
 
 <br />
 
