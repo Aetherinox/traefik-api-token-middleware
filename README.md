@@ -1,12 +1,12 @@
 <div align="center">
-<h6>Traefik v3 middleware which allows for you to protect certain aspects of your site with an API key.</h6>
-<h2>♾️ Traefik API Key Middleware ♾️</h1>
+<h6>Traefik v3 middleware which allows for you to protect certain aspects of your site with an API token.</h6>
+<h2>♾️ Traefik API Token Middleware ♾️</h1>
 
 <br />
 
 <p>
 
-This Traefik middleware allows you to secure certain routes behind a request header API key. Users who have not successfully authenticated will be greeted with a **403 Forbidden Error**.
+This Traefik middleware allows you to secure certain routes behind a request header API token. Users who have not successfully authenticated will be greeted with a **403 Forbidden Error**.
 
 </p>
 
@@ -227,7 +227,7 @@ This setting changes the text at the beginning of an error message when an inval
 `authenticationErrorMsg: `
 ```json
 {
-  "message": "Access Denied. Must pass a valid API Token header using either X-API-TOKEN: $token or Authorization: Bearer $key",
+  "message": "Access Denied. Must pass a valid API Token header using either X-API-TOKEN: $token or Authorization: Bearer $token",
   "status_code": 403,
   "timestamp": "Fri Sep 27 03:24:27 UTC 2024"
 }
@@ -238,7 +238,7 @@ This setting changes the text at the beginning of an error message when an inval
 `authenticationErrorMsg: "You cannot access this API"`
 ```json
 {
-  "message": "You cannot access this API. Must pass a valid API Token header using either X-API-TOKEN: $token or Authorization: Bearer $key",
+  "message": "You cannot access this API. Must pass a valid API Token header using either X-API-TOKEN: $token or Authorization: Bearer $token",
   "status_code": 403,
   "timestamp": "Fri Sep 27 03:24:27 UTC 2024"
 }
@@ -255,7 +255,7 @@ This setting changes how error messages are displayed to a user who doesn't prov
 `removeTokenNameOnFailure: true`
 ```json
 {
-  "message": "Access Denied. Must pass a valid API Token header using either X-API-TOKEN: $token or Authorization: Bearer $key",
+  "message": "Access Denied. Must pass a valid API Token header using either X-API-TOKEN: $token or Authorization: Bearer $token",
   "status_code": 403,
   "timestamp": "1727432498"
 }
@@ -283,7 +283,7 @@ This setting changes how the date / time will be displayed in your API callback 
 `timestampUnix: true`
 ```json
 {
-  "message": "Access Denied. Must pass a valid API Token header using either X-API-TOKEN: $token or Authorization: Bearer $key",
+  "message": "Access Denied. Must pass a valid API Token header using either X-API-TOKEN: $token or Authorization: Bearer $token",
   "status_code": 403,
   "timestamp": "1727432498"
 }
@@ -294,7 +294,7 @@ This setting changes how the date / time will be displayed in your API callback 
 `timestampUnix: false`
 ```json
 {
-  "message": "Access Denied. Must pass a valid API Token header using either X-API-TOKEN: $token or Authorization: Bearer $key",
+  "message": "Access Denied. Must pass a valid API Token header using either X-API-TOKEN: $token or Authorization: Bearer $token",
   "status_code": 403,
   "timestamp": "Fri Sep 27 03:24:27 UTC 2024"
 }
@@ -359,7 +359,7 @@ http:
 <br />
 
 ## Browser Plugins
-If you do not want to specify an API key using conventional means (such as by using `curl`), you can utilize a front-end browser extension. This allows you to supply a modified request header with your specific API key which will grant you access to your desired location.
+If you do not want to specify an API token using conventional means (such as by using `curl`), you can utilize a front-end browser extension. This allows you to supply a modified request header with your specific API token which will grant you access to your desired location.
 
 <br />
 

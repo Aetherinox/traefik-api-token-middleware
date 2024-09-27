@@ -57,11 +57,11 @@ Stuff happens, and sometimes as best as we try, there may be issues within this 
 
 <br />
 
-If you have found a bug, have an issue, or maybe even a cool idea; you can let us know by [submitting it](https://github.com/aetherinox/traefik-api-token-middleware/issues). However, before you submit your new issue, bug report, or feature request; head over to the [Issues Section](https://github.com/aetherinox/traefik-api-token-middleware/issues) and ensure nobody else has already submitted it.
+If you have found a bug, have an issue, or maybe even a cool idea; you can let us know by [submitting it](https://github.com/Aetherinox/traefik-api-token-middleware/issues). However, before you submit your new issue, bug report, or feature request; head over to the [Issues Section](https://github.com/Aetherinox/traefik-api-token-middleware/issues) and ensure nobody else has already submitted it.
 
 <br />
 
-Once you are sure that your issue has not already being dealt with; you may submit a new issue at [here](https://github.com/aetherinox/traefik-api-token-middleware/issues/new/choose). You'll be asked to specify exactly what your new submission targets, such as:
+Once you are sure that your issue has not already being dealt with; you may submit a new issue at [here](https://github.com/Aetherinox/traefik-api-token-middleware/issues/new/choose). You'll be asked to specify exactly what your new submission targets, such as:
 - Bug report
 - Feature Suggestion
 
@@ -314,7 +314,7 @@ When writing your code, set your IDE to utilize **spaces**, with a configured si
 
 <!-- BADGE > BUTTON > SUBMIT ISSUES -->
   [btn-github-submit-img]: https://img.shields.io/badge/submit%20new%20issue-de1f5c?style=for-the-badge&logo=github&logoColor=FFFFFF
-  [btn-github-submit-uri]: https://github.com/aetherinox/traefik-api-token-middleware/issues
+  [btn-github-submit-uri]: https://github.com/Aetherinox/traefik-api-token-middleware/issues
 
 <!-- prettier-ignore-end -->
 <!-- markdownlint-restore -->
