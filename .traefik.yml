@@ -1,14 +1,17 @@
-﻿displayName: API Key Middleware
+﻿displayName: API Token Middleware
 type: middleware
 iconPath: .assets/logo.png
 import: github.com/Aetherinox/traefik-api-token-middleware
-summary: "Seamless API key integration"
+summary: "Integrate API tokens into the request header for your services."
 
 testData:
   authenticationHeader: true
   authenticationHeaderName: X-API-TOKEN
+  authenticationErrorMsg: "Access Denied"
   bearerHeader: true
   bearerHeaderName: Authorization
   removeHeadersOnSuccess: true
+  removeTokenNameOnFailure: false
+  timestampUnix: false
   tokens:
     - 10854495-364f-4f73-aa6a-a71b317fc0b1
