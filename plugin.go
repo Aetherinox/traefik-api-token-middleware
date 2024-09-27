@@ -16,22 +16,27 @@ import (
     "time"
 	"strconv"
 	"encoding/json"
+    "os"
 )
 
 /*
 	Construct Configurations
+
+	OTP Secret can be generated at		https://it-tools.tech/otp-generator
 */
 
 type Config struct {
-	AuthenticationHeader     	bool     `json:"authenticationHeader,omitempty"`
-	AuthenticationHeaderName 	string   `json:"authenticationHeaderName,omitempty"`
-	AuthenticationErrorMsg 		string   `json:"authenticationErrorMsg,omitempty"`
-	BearerHeader             	bool     `json:"bearerHeader,omitempty"`
-	BearerHeaderName         	string   `json:"bearerHeaderName,omitempty"`
-	Tokens                     	[]string `json:"tokens,omitempty"`
-	RemoveHeadersOnSuccess   	bool     `json:"removeHeadersOnSuccess,omitempty"`
-	RemoveTokenNameOnFailure	bool     `json:"removeTokenNameOnError,omitempty"`
-	TimestampUnix     			bool     `json:"timestampUnix,omitempty"`
+	AuthenticationHeader     	bool     	`json:"authenticationHeader,omitempty"`
+	AuthenticationHeaderName 	string   	`json:"authenticationHeaderName,omitempty"`
+	AuthenticationErrorMsg 		string   	`json:"authenticationErrorMsg,omitempty"`
+	BearerHeader             	bool     	`json:"bearerHeader,omitempty"`
+	BearerHeaderName         	string   	`json:"bearerHeaderName,omitempty"`
+	Tokens                     	[]string 	`json:"tokens,omitempty"`
+	RemoveHeadersOnSuccess   	bool     	`json:"removeHeadersOnSuccess,omitempty"`
+	RemoveTokenNameOnFailure	bool     	`json:"removeTokenNameOnError,omitempty"`
+	OtpEnabled 					bool   		`json:"otpEnabled,omitempty"`
+	OtpSecret 					string   	`json:"otpSecret,omitempty"`
+	TimestampUnix     			bool     	`json:"timestampUnix,omitempty"`
 }
 
 /*
@@ -58,6 +63,8 @@ func CreateConfig() *Config {
 		Tokens:                  	make([]string, 0),
 		RemoveHeadersOnSuccess:   	true,
 		RemoveTokenNameOnFailure:	false,
+		OtpEnabled:					false,
+		OtpSecret: 					"5G6PLJ5YVBMLK5UA",
 		TimestampUnix:				false,
 	}
 }
@@ -72,6 +79,8 @@ type KeyAuth struct {
 	tokens                     	[]string
 	removeHeadersOnSuccess   	bool
 	removeTokenNameOnFailure	bool
+	otpEnabled   				bool
+	otpSecret         			string
 	timestampUnix				bool
 }
 
