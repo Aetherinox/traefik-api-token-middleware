@@ -215,6 +215,10 @@ This plugin accepts the following parameters:
 
 <br />
 
+- ⚠️: Plugin requires that you enable either `authenticationHeader` OR `bearerHeader`. One of the two **MUST** be enabled.
+
+<br />
+
 ### authenticationErrorMsg
 This setting changes the text at the beginning of an error message when an invalid token is specified.
 
