@@ -52,7 +52,7 @@ This Traefik middleware allows you to secure certain routes behind a request hea
   - [authenticationErrorMsg](#authenticationerrormsg)
   - [removeTokenNameOnFailure](#removetokennameonfailure)
   - [timestampUnix](#timestampunix)
-- [Usage](#usage)
+- [Full Examples](#full-examples)
 - [Browser Plugins](#browser-plugins)
   - [Firefox](#firefox)
     - [Extension: Header Editor](#extension-header-editor)
@@ -302,8 +302,51 @@ This setting changes how the date / time will be displayed in your API callback 
 
 <br />
 
-## Usage
-Implementing an API key route is simple.
+## Full Examples
+A few extra examples have been provided.
+
+<br />
+
+```yml
+http:
+  middlewares:
+    api-token:
+      plugin:
+        traefik-api-token-middleware:
+          authenticationHeader: true
+          authenticationHeaderName: X-API-TOKEN
+          authenticationErrorMsg: "Invalid token"
+          bearerHeader: true
+          bearerHeaderName: Authorization
+          removeHeadersOnSuccess: true
+          removeTokenNameOnFailure: false
+          timestampUnix: false
+          tokens:
+            - your-api-token
+
+    routers:
+        traefik-http:
+            service: "traefik"
+            rule: "Host(`yourdomain.com`)"
+            entryPoints:
+                - http
+            middlewares:
+                - https-redirect@file
+
+        traefik-https:
+            service: "traefik"
+            rule: "Host(`yourdomain.com`)"
+            entryPoints:
+                - https
+            middlewares:
+                - api-token@file
+            tls:
+                certResolver: cloudflare
+                domains:
+                    - main: "yourdomain.com"
+                      sans:
+                          - "*.yourdomain.com"
+```
 
 <br />
 
