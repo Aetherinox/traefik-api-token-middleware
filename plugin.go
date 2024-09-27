@@ -123,17 +123,18 @@ func contains(token string, validTokens []string) bool {
 			return true
 		}
 	}
+
 	return false
 }
 
 /*
-	Bearer takes API key in `Authorization: Bearer $token` variant and compares it to list ov valid tokens.
+	Bearer takes API token in `Authorization: Bearer $token` variant and compares it to list ov valid tokens.
 	Token is extracted from header request value.
-	Returns whether key is in list of valid tokens
+	Returns whether token is in list of valid tokens
 */
 
 func bearer(token string, validTokens []string) bool {
-	re, _ := regexp.Compile(`Bearer\s(?P<key>[^$]+)`)
+	re, _ := regexp.Compile(`Bearer\s(?P<token>[^$]+)`)
 	matches := re.FindStringSubmatch(token)
 
 	/*
@@ -239,7 +240,7 @@ func (ka *KeyAuth) ServeHTTP(rw http.ResponseWriter, req *http.Request) {
 	var response Response
 	if ka.authenticationHeader && ka.bearerHeader {
 		if !ka.removeTokenNameOnFailure {
-			output = fmt.Sprintf(output + ". Provide a valid API Token header using either %s: $token or %s: Bearer $key", ka.authenticationHeaderName, ka.bearerHeaderName)
+			output = fmt.Sprintf(output + ". Provide a valid API Token header using either %s: $token or %s: Bearer $token", ka.authenticationHeaderName, ka.bearerHeaderName)
 		}
 
 		response = Response{
