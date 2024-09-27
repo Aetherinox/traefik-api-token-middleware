@@ -1,150 +1,292 @@
-package traefik_middleware_apikey
+/*
+	Package
+*/
+
+package traefik_api_token_middleware
+
+/*
+	Imports
+*/
 
 import (
+	"regexp"
 	"context"
-	"encoding/json"
 	"fmt"
 	"net/http"
-	"regexp"
+    "time"
+	"strconv"
+	"encoding/json"
 )
 
+/*
+	Construct Configurations
+*/
+
 type Config struct {
-	AuthenticationHeader     bool     `json:"authenticationHeader,omitempty"`
-	AuthenticationHeaderName string   `json:"headerName,omitempty"`
-	BearerHeader             bool     `json:"bearerHeader,omitempty"`
-	BearerHeaderName         string   `json:"bearerHeaderName,omitempty"`
-	Keys                     []string `json:"keys,omitempty"`
-	RemoveHeadersOnSuccess   bool     `json:"removeHeadersOnSuccess,omitempty"`
+	AuthenticationHeader     	bool     `json:"authenticationHeader,omitempty"`
+	AuthenticationHeaderName 	string   `json:"authenticationHeaderName,omitempty"`
+	AuthenticationErrorMsg 		string   `json:"authenticationErrorMsg,omitempty"`
+	BearerHeader             	bool     `json:"bearerHeader,omitempty"`
+	BearerHeaderName         	string   `json:"bearerHeaderName,omitempty"`
+	Tokens                     	[]string `json:"tokens,omitempty"`
+	RemoveHeadersOnSuccess   	bool     `json:"removeHeadersOnSuccess,omitempty"`
+	NoPublicTokenOnError   		bool     `json:"noPublicTokenOnError,omitempty"`
+	TimestampUnix     			bool     `json:"timestampUnix,omitempty"`
 }
 
+/*
+	Construct Response
+*/
+
 type Response struct {
-	Message    string `json:"message"`
-	StatusCode int    `json:"status_code"`
+	Message    	string 	`json:"message"`
+	StatusCode 	int    	`json:"status_code"`
+	Timestamp 	string	`json:"timestamp"`
 }
+
+/*
+	Create Config
+*/
 
 func CreateConfig() *Config {
 	return &Config{
-		AuthenticationHeader:     true,
-		AuthenticationHeaderName: "X-API-KEY",
-		BearerHeader:             true,
-		BearerHeaderName:         "Authorization",
-		Keys:                     make([]string, 0),
-		RemoveHeadersOnSuccess:   true,
+		AuthenticationHeader:     	true,
+		AuthenticationHeaderName: 	"X-API-TOKEN",
+		AuthenticationErrorMsg: 	"Access Denied",
+		BearerHeader:             	true,
+		BearerHeaderName:         	"Authorization",
+		Tokens:                  	make([]string, 0),
+		RemoveHeadersOnSuccess:   	true,
+		NoPublicTokenOnError:   	false,
+		TimestampUnix:				false,
 	}
 }
 
 type KeyAuth struct {
-	next                     http.Handler
-	authenticationHeader     bool
-	authenticationHeaderName string
-	bearerHeader             bool
-	bearerHeaderName         string
-	keys                     []string
-	removeHeadersOnSuccess   bool
+	next                     	http.Handler
+	authenticationHeader     	bool
+	authenticationHeaderName 	string
+	authenticationErrorMsg   	string
+	bearerHeader             	bool
+	bearerHeaderName         	string
+	tokens                     	[]string
+	removeHeadersOnSuccess   	bool
+	noPublicTokenOnError   		bool
+	timestampUnix				bool
 }
 
 func New(ctx context.Context, next http.Handler, config *Config, name string) (http.Handler, error) {
-	fmt.Printf("Creating plugin: %s instance: %+v, ctx: %+v\n", name, *config, ctx)
+	fmt.Printf("Spinning up plugin: %s instance: %+v, ctx: %+v\n", name, *config, ctx)
 
-	// check for empty keys
-	if len(config.Keys) == 0 {
-		return nil, fmt.Errorf("must specify at least one valid key")
+	/*
+		Scan for empty tokens / keys
+	*/
+
+	if len(config.Tokens) == 0 {
+		return nil, fmt.Errorf("must specify at least one valid token")
 	}
 
-	// check at least one header is set
+	/*
+		At least one header must be specified
+	*/
+
 	if !config.AuthenticationHeader && !config.BearerHeader {
 		return nil, fmt.Errorf("at least one header type must be true")
 	}
 
-	return &KeyAuth{
-		next:                     next,
-		authenticationHeader:     config.AuthenticationHeader,
-		authenticationHeaderName: config.AuthenticationHeaderName,
-		bearerHeader:             config.BearerHeader,
-		bearerHeaderName:         config.BearerHeaderName,
-		keys:                     config.Keys,
-		removeHeadersOnSuccess:   config.RemoveHeadersOnSuccess,
+	/*
+		return structure
+	*/
+
+	return &KeyAuth {
+		next:                     	next,
+		authenticationHeader:     	config.AuthenticationHeader,
+		authenticationHeaderName: 	config.AuthenticationHeaderName,
+		authenticationErrorMsg: 	config.AuthenticationErrorMsg,
+		bearerHeader:             	config.BearerHeader,
+		bearerHeaderName:         	config.BearerHeaderName,
+		tokens:                  	config.Tokens,
+		removeHeadersOnSuccess:   	config.RemoveHeadersOnSuccess,
+		noPublicTokenOnError:   	config.NoPublicTokenOnError,
+		timestampUnix:   			config.TimestampUnix,
 	}, nil
 }
 
-// contains takes an API key and compares it to the list of valid API keys. The return value notes whether the
-// key is in the valid keys
-// list or not.
-func contains(key string, validKeys []string) bool {
-	for _, a := range validKeys {
-		if a == key {
+/*
+	taken api tokens and compare to list of valid tokens.
+	return if specified token is valid
+*/
+
+func contains(token string, validTokens []string) bool {
+	for _, a := range validTokens {
+		if a == token {
 			return true
 		}
 	}
 	return false
 }
 
-// bearer takes an API key in the `Authorization: Bearer $token` form and compares it to the list of valid keys.
-// The token/key is extracted from the header value. The return value notes whether the key is in the valid keys
-// list or not.
-func bearer(key string, validKeys []string) bool {
+/*
+	Bearer takes API key in `Authorization: Bearer $token` variant and compares it to list ov valid tokens.
+	Token is extracted from header request value.
+	Returns whether key is in list of valid tokens
+*/
+
+func bearer(token string, validTokens []string) bool {
 	re, _ := regexp.Compile(`Bearer\s(?P<key>[^$]+)`)
-	matches := re.FindStringSubmatch(key)
+	matches := re.FindStringSubmatch(token)
+
+	/*
+		No Match Found > Wrong form
+	*/
 
 	// If no match found the value is in the wrong form.
 	if matches == nil {
 		return false
 	}
 
-	// If found extract the key and compare it to the list of valid keys
-	keyIndex := re.SubexpIndex("key")
-	extractedKey := matches[keyIndex]
-	return contains(extractedKey, validKeys)
+	/*
+		Match Found > Compare to list of valid tokens
+	*/
+
+	tokenIndex := re.SubexpIndex("token")
+	extractedToken := matches[tokenIndex]
+
+	return contains(extractedToken, validTokens)
 }
 
 func (ka *KeyAuth) ServeHTTP(rw http.ResponseWriter, req *http.Request) {
-	// Check authentication header for valid key
+
+	/*
+		Authentication Header > check for valid token
+	*/
+
 	if ka.authenticationHeader {
-		if contains(req.Header.Get(ka.authenticationHeaderName), ka.keys) {
-			// X-API-KEY header contains a valid key
+		if contains(req.Header.Get(ka.authenticationHeaderName), ka.tokens) {
+
+			/*
+				Authentication Header > X-API-TOKEN header request contains valid token
+			*/
+
 			if ka.removeHeadersOnSuccess {
 				req.Header.Del(ka.authenticationHeaderName)
 			}
+	
 			ka.next.ServeHTTP(rw, req)
+	
 			return
 		}
 	}
 
-	// Check authorization header for valid Bearer
+	/*
+		Bearer Header > check for valid token
+	*/
+
 	if ka.bearerHeader {
-		if bearer(req.Header.Get(ka.bearerHeaderName), ka.keys) {
-			// Authorization header contains a valid Bearer token
+		if bearer(req.Header.Get(ka.bearerHeaderName), ka.tokens) {
+
+			/*
+				Bearer Header > Request header contains valid Bearer Token
+			*/
+
 			if ka.removeHeadersOnSuccess {
 				req.Header.Del(ka.bearerHeaderName)
 			}
+
 			ka.next.ServeHTTP(rw, req)
+
 			return
 		}
 	}
 
+	/*
+		Gather some settings and values
+
+		- default output msg
+		- timestamp (Unix Timestamp || UnixDate)
+	*/
+
+	output := "Access Denied"
+	now := time.Now().Format(time.UnixDate) // UnixDate
+
+    if len(ka.authenticationErrorMsg) > 0 {
+        output = ka.authenticationErrorMsg
+    }
+
+	/*
+		ANSIC 		"Mon Jan _2 15:04:05 2006"
+		UnixDate 	"Mon Jan _2 15:04:05 PST 2006"
+		RubyDate 	"Mon Jan 02 15:04:05 -0700 2006"
+		RFC822 		"02 Jan 06 15:04 PST"
+		RFC822Z 	"02 Jan 06 15:04 -0700"
+		RFC850 		"Monday, 02-Jan-06 15:04:05 PST"
+		RFC1123 	"Mon, 02 Jan 2006 15:04:05 PST"
+		RFC1123Z 	"Mon, 02 Jan 2006 15:04:05 -0700"
+		RFC3339 	"2006-01-02T15:04:05Z07:00"
+		RFC3339Nano	"2006-01-02T15:04:05.999999999Z07:00"
+	*/
+
+    if ka.timestampUnix {
+        var ts int = int(time.Now().Unix()) // Unix timestamp
+		now = strconv.Itoa(ts)
+		// int - 
+    }
+
+	/*
+		Determine Auth Method & return response
+	*/
+
 	var response Response
 	if ka.authenticationHeader && ka.bearerHeader {
+		if !ka.noPublicTokenOnError {
+			output = fmt.Sprintf(output + ". Must pass a valid API Token header using either %s: $token or %s: Bearer $key", ka.authenticationHeaderName, ka.bearerHeaderName)
+		}
+
 		response = Response{
-			Message:    fmt.Sprintf("Unauthorized Access"),
-			StatusCode: http.StatusForbidden,
+			Message:    	output,
+			StatusCode: 	http.StatusForbidden,
+			Timestamp: 		now,
 		}
 	} else if ka.authenticationHeader && !ka.bearerHeader {
+		if !ka.noPublicTokenOnError {
+			output = fmt.Sprintf(output + ". Must pass a valid API Token header using %s: $token", ka.authenticationHeaderName)
+		}
+
 		response = Response{
-			Message:    fmt.Sprintf("Unauthorized Access"),
-			StatusCode: http.StatusForbidden,
+			Message:    	output,
+			StatusCode: 	http.StatusForbidden,
+			Timestamp: 		now,
 		}
 	} else if !ka.authenticationHeader && ka.bearerHeader {
+		if !ka.noPublicTokenOnError {
+			output = fmt.Sprintf(output + ". Must pass a valid API Token header using %s: Bearer $token", ka.bearerHeaderName)
+		}
+
 		response = Response{
-			Message:    fmt.Sprintf("Unauthorized Access"),
-			StatusCode: http.StatusForbidden,
+			Message:    	output,
+			StatusCode: 	http.StatusForbidden,
+			Timestamp: 		now,
 		}
 	}
+
+	/*
+		Set Headers
+	*/
+
 	rw.Header().Set("Content-Type", "application/json; charset=utf-8")
 	rw.WriteHeader(response.StatusCode)
 
-	// If no headers or invalid key, return 403
+	/*
+		No Headers or Invalid Key
+		return 403 Forbidden
+	*/
+
 	if err := json.NewEncoder(rw).Encode(response); err != nil {
-		// If response cannot be written, log error
-		fmt.Printf("Error when sending response to an invalid key: %s", err.Error())
+
+		/*
+			Response can't be written > log error
+		*/
+		
+		fmt.Printf("Error when sending response to an invalid token: %s", err.Error())
 	}
 }

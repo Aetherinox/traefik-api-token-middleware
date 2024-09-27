@@ -1,5 +1,5 @@
 {
-    "projectName": "traefik-apikey-middleware",
+    "projectName": "traefik-api-token-middleware",
     "projectOwner": "Aetherinox",
     "repoType": "github",
     "repoHost": "https://github.com",

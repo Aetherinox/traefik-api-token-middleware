@@ -57,11 +57,11 @@ Stuff happens, and sometimes as best as we try, there may be issues within this 
 
 <br />
 
-If you have found a bug, have an issue, or maybe even a cool idea; you can let us know by [submitting it](https://github.com/aetherinox/traefik-apikey-middleware/issues). However, before you submit your new issue, bug report, or feature request; head over to the [Issues Section](https://github.com/aetherinox/traefik-apikey-middleware/issues) and ensure nobody else has already submitted it.
+If you have found a bug, have an issue, or maybe even a cool idea; you can let us know by [submitting it](https://github.com/aetherinox/traefik-api-token-middleware/issues). However, before you submit your new issue, bug report, or feature request; head over to the [Issues Section](https://github.com/aetherinox/traefik-api-token-middleware/issues) and ensure nobody else has already submitted it.
 
 <br />
 
-Once you are sure that your issue has not already being dealt with; you may submit a new issue at [here](https://github.com/aetherinox/traefik-apikey-middleware/issues/new/choose). You'll be asked to specify exactly what your new submission targets, such as:
+Once you are sure that your issue has not already being dealt with; you may submit a new issue at [here](https://github.com/aetherinox/traefik-api-token-middleware/issues/new/choose). You'll be asked to specify exactly what your new submission targets, such as:
 - Bug report
 - Feature Suggestion
 
@@ -254,67 +254,67 @@ When writing your code, set your IDE to utilize **spaces**, with a configured si
 <!-- BADGE > GENERAL -->
   [general-npmjs-uri]: https://npmjs.com
   [general-nodejs-uri]: https://nodejs.org
-  [general-npmtrends-uri]: http://npmtrends.com/traefik-apikey-middleware
+  [general-npmtrends-uri]: http://npmtrends.com/traefik-api-token-middleware
 
 <!-- BADGE > VERSION > GITHUB -->
-  [github-version-img]: https://img.shields.io/github/v/tag/Aetherinox/traefik-apikey-middleware?logo=GitHub&label=Version&color=ba5225
-  [github-version-uri]: https://github.com/Aetherinox/traefik-apikey-middleware/releases
+  [github-version-img]: https://img.shields.io/github/v/tag/Aetherinox/traefik-api-token-middleware?logo=GitHub&label=Version&color=ba5225
+  [github-version-uri]: https://github.com/Aetherinox/traefik-api-token-middleware/releases
 
 <!-- BADGE > VERSION > NPMJS -->
-  [npm-version-img]: https://img.shields.io/npm/v/traefik-apikey-middleware?logo=npm&label=Version&color=ba5225
-  [npm-version-uri]: https://npmjs.com/package/traefik-apikey-middleware
+  [npm-version-img]: https://img.shields.io/npm/v/traefik-api-token-middleware?logo=npm&label=Version&color=ba5225
+  [npm-version-uri]: https://npmjs.com/package/traefik-api-token-middleware
 
 <!-- BADGE > VERSION > PYPI -->
-  [pypi-version-img]: https://img.shields.io/pypi/v/traefik-apikey-middleware-plugin
-  [pypi-version-uri]: https://pypi.org/project/traefik-apikey-middleware-plugin/
+  [pypi-version-img]: https://img.shields.io/pypi/v/traefik-api-token-middleware-plugin
+  [pypi-version-uri]: https://pypi.org/project/traefik-api-token-middleware-plugin/
 
 <!-- BADGE > LICENSE > MIT -->
   [license-mit-img]: https://img.shields.io/badge/MIT-FFF?logo=creativecommons&logoColor=FFFFFF&label=License&color=9d29a0
-  [license-mit-uri]: https://github.com/Aetherinox/traefik-apikey-middleware/blob/main/LICENSE
+  [license-mit-uri]: https://github.com/Aetherinox/traefik-api-token-middleware/blob/main/LICENSE
 
 <!-- BADGE > GITHUB > DOWNLOAD COUNT -->
-  [github-downloads-img]: https://img.shields.io/github/downloads/Aetherinox/traefik-apikey-middleware/total?logo=github&logoColor=FFFFFF&label=Downloads&color=376892
-  [github-downloads-uri]: https://github.com/Aetherinox/traefik-apikey-middleware/releases
+  [github-downloads-img]: https://img.shields.io/github/downloads/Aetherinox/traefik-api-token-middleware/total?logo=github&logoColor=FFFFFF&label=Downloads&color=376892
+  [github-downloads-uri]: https://github.com/Aetherinox/traefik-api-token-middleware/releases
 
 <!-- BADGE > NPMJS > DOWNLOAD COUNT -->
   [npmjs-downloads-img]: https://img.shields.io/npm/dw/%40aetherinox%2Fmkdocs-link-embeds?logo=npm&&label=Downloads&color=376892
-  [npmjs-downloads-uri]: https://npmjs.com/package/traefik-apikey-middleware
+  [npmjs-downloads-uri]: https://npmjs.com/package/traefik-api-token-middleware
 
 <!-- BADGE > GITHUB > DOWNLOAD SIZE -->
-  [github-size-img]: https://img.shields.io/github/repo-size/Aetherinox/traefik-apikey-middleware?logo=github&label=Size&color=59702a
-  [github-size-uri]: https://github.com/Aetherinox/traefik-apikey-middleware/releases
+  [github-size-img]: https://img.shields.io/github/repo-size/Aetherinox/traefik-api-token-middleware?logo=github&label=Size&color=59702a
+  [github-size-uri]: https://github.com/Aetherinox/traefik-api-token-middleware/releases
 
 <!-- BADGE > NPMJS > DOWNLOAD SIZE -->
-  [npmjs-size-img]: https://img.shields.io/npm/unpacked-size/traefik-apikey-middleware/latest?logo=npm&label=Size&color=59702a
-  [npmjs-size-uri]: https://npmjs.com/package/traefik-apikey-middleware
+  [npmjs-size-img]: https://img.shields.io/npm/unpacked-size/traefik-api-token-middleware/latest?logo=npm&label=Size&color=59702a
+  [npmjs-size-uri]: https://npmjs.com/package/traefik-api-token-middleware
 
 <!-- BADGE > CODECOV > COVERAGE -->
-  [codecov-coverage-img]: https://img.shields.io/codecov/c/github/Aetherinox/traefik-apikey-middleware?token=MPAVASGIOG&logo=codecov&logoColor=FFFFFF&label=Coverage&color=354b9e
-  [codecov-coverage-uri]: https://codecov.io/github/Aetherinox/traefik-apikey-middleware
+  [codecov-coverage-img]: https://img.shields.io/codecov/c/github/Aetherinox/traefik-api-token-middleware?token=MPAVASGIOG&logo=codecov&logoColor=FFFFFF&label=Coverage&color=354b9e
+  [codecov-coverage-uri]: https://codecov.io/github/Aetherinox/traefik-api-token-middleware
 
 <!-- BADGE > ALL CONTRIBUTORS -->
-  [contribs-all-img]: https://img.shields.io/github/all-contributors/Aetherinox/traefik-apikey-middleware?logo=contributorcovenant&color=de1f6f&label=contributors
+  [contribs-all-img]: https://img.shields.io/github/all-contributors/Aetherinox/traefik-api-token-middleware?logo=contributorcovenant&color=de1f6f&label=contributors
   [contribs-all-uri]: https://github.com/all-contributors/all-contributors
 
 <!-- BADGE > GITHUB > BUILD > NPM -->
-  [github-build-img]: https://img.shields.io/github/actions/workflow/status/Aetherinox/traefik-apikey-middleware/deb_build.yml?logo=github&logoColor=FFFFFF&label=Build&color=%23278b30
-  [github-build-uri]: https://github.com/Aetherinox/traefik-apikey-middleware/actions/workflows/deb_build.yml
+  [github-build-img]: https://img.shields.io/github/actions/workflow/status/Aetherinox/traefik-api-token-middleware/deb_build.yml?logo=github&logoColor=FFFFFF&label=Build&color=%23278b30
+  [github-build-uri]: https://github.com/Aetherinox/traefik-api-token-middleware/actions/workflows/deb_build.yml
 
 <!-- BADGE > GITHUB > BUILD > Pypi -->
-  [github-build-pypi-img]: https://img.shields.io/github/actions/workflow/status/Aetherinox/traefik-apikey-middleware/release-pypi.yml?logo=github&logoColor=FFFFFF&label=Build&color=%23278b30
-  [github-build-pypi-uri]: https://github.com/Aetherinox/traefik-apikey-middleware/actions/workflows/pypi-release.yml
+  [github-build-pypi-img]: https://img.shields.io/github/actions/workflow/status/Aetherinox/traefik-api-token-middleware/release-pypi.yml?logo=github&logoColor=FFFFFF&label=Build&color=%23278b30
+  [github-build-pypi-uri]: https://github.com/Aetherinox/traefik-api-token-middleware/actions/workflows/pypi-release.yml
 
 <!-- BADGE > GITHUB > TESTS -->
-  [github-tests-img]: https://img.shields.io/github/actions/workflow/status/Aetherinox/traefik-apikey-middleware/npm-tests.yml?logo=github&label=Tests&color=2c6488
-  [github-tests-uri]: https://github.com/Aetherinox/traefik-apikey-middleware/actions/workflows/npm-tests.yml
+  [github-tests-img]: https://img.shields.io/github/actions/workflow/status/Aetherinox/traefik-api-token-middleware/npm-tests.yml?logo=github&label=Tests&color=2c6488
+  [github-tests-uri]: https://github.com/Aetherinox/traefik-api-token-middleware/actions/workflows/npm-tests.yml
 
 <!-- BADGE > GITHUB > COMMIT -->
-  [github-commit-img]: https://img.shields.io/github/last-commit/Aetherinox/traefik-apikey-middleware?logo=conventionalcommits&logoColor=FFFFFF&label=Last%20Commit&color=313131
-  [github-commit-uri]: https://github.com/Aetherinox/traefik-apikey-middleware/commits/main/
+  [github-commit-img]: https://img.shields.io/github/last-commit/Aetherinox/traefik-api-token-middleware?logo=conventionalcommits&logoColor=FFFFFF&label=Last%20Commit&color=313131
+  [github-commit-uri]: https://github.com/Aetherinox/traefik-api-token-middleware/commits/main/
 
 <!-- BADGE > BUTTON > SUBMIT ISSUES -->
   [btn-github-submit-img]: https://img.shields.io/badge/submit%20new%20issue-de1f5c?style=for-the-badge&logo=github&logoColor=FFFFFF
-  [btn-github-submit-uri]: https://github.com/aetherinox/traefik-apikey-middleware/issues
+  [btn-github-submit-uri]: https://github.com/aetherinox/traefik-api-token-middleware/issues
 
 <!-- prettier-ignore-end -->
 <!-- markdownlint-restore -->

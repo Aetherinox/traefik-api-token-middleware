@@ -1,3 +1,3 @@
-module github.com/Aetherinox/traefik-apikey-middleware
+module github.com/Aetherinox/traefik-api-token-middleware
 
 go 1.19
