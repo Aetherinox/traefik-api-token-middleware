@@ -434,7 +434,56 @@ Once you have your modified header added to the browser extension, verify it by 
 ## Verifying Modified Headers
 This section explains how you can verify that your modified request header is being received by your server.
 
-If you now go to the subdomain and open the browser developer tools, and on the **Inspector** tab, scroll to the very bottom.
+Access the subdomain where you have applied an API-TOKEN. Once the page loads, open the **Developer Console**.
+
+- Firefox: `SHIFT + CTRL + I`
+- Chrome: `SHIFT + CTRL + I`
+- Safari: `Option + ⌘ + C`
+
+<br />
+
+A box should appear either on the right or bottom. Within the **Console** tab, ensure you have `Errors`, `Warnings`, `Logs`, `Info`, and `Debug` selected. They will have lines under them when enabled.
+
+<br />
+
+<p align="center"><img style="width: 100%;text-align: center;" src="https://github.com/user-attachments/assets/6472e1e5-a232-42a4-89b7-ef233e40a680"></p>
+
+<br />
+
+Next, refresh your browser's page.
+
+- Firefox: `SHIFT + F5`
+- Chrome: `SHIFT + F5`
+- Safari: `OPTION + ⌘ + E`
+
+<br />
+
+<p align="center"><img style="width: 100%;text-align: center;" src="https://github.com/user-attachments/assets/39be9dd5-cce8-4995-81b5-4cfbaa21d793"></p>
+
+<br />
+
+In the bottom box, you should see a list of actions, which display your domain name, a status code, and the number of milliseconds it took to perform the action.
+
+```
+01:00:25.139        GET https://sub.yourdomain.com                     [HTTP/2 403  1ms]
+```
+
+<br />
+
+- `403` status: API-TOKEN was not accepted.
+- `200` status: API-TOKEN was accepted. (along with being able to actually see your site)
+
+<br />
+
+Typically with a `403` status, you can click the box that contains the status code with your domain, which will expand a box and show you the headers that were passed to the site, including your `API-TOKEN`.
+
+<br />
+
+<p align="center"><img style="width: 100%;text-align: center;" src="https://github.com/user-attachments/assets/2de09e61-3b2a-45f7-8434-9b861ed2320f"></p>
+
+<br />
+
+In the example above, we've passed `BadToken` which can be seen in the header response.
 
 <br />
 
