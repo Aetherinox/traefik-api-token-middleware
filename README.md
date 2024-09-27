@@ -199,17 +199,19 @@ spec:
 ## Parameters
 This plugin accepts the following parameters:
 
+<br />
+
 | Parameter | Description | Default | Type | Required |
 | --- | --- | --- | --- | --- |
-| `tokens` | List of API tokens | [] | <sub>[]string</sub> | ✔️ Required |
-| `authenticationHeader` | Pass token using Authentication Header | true | <sub>bool</sub> | ⚠️ Note | 
-| `authenticationHeaderName` | Authentication header name | 'X-API-TOKEN' | <sub>string</sub> | ⭕ Optional | 
-| `authenticationErrorMsg` | Error message to display on unsuccessful authentication | 'Access Denied' | <sub>string</sub> | ⭕ Optional |
-| `bearerHeader` | Pass token using Authentication Header Bearer Key | true | <sub>bool</sub> | ⚠️ Note |
-| `bearerHeaderName` | Authentication bearer header name | 'Authorization' | <sub>string</sub> | ⭕ Optional |
-| `removeHeadersOnSuccess` | If `true`; remove header on successful authentication | true | <sub>bool</sub> | ⭕ Optional |
-| `removeTokenNameOnFailure` | Don't display name of token in unsuccessful error message | false | <sub>bool</sub> | ⭕ Optional |
-| `timestampUnix` | Display datetime in Unix timestamp instead of UnixDate | false | <sub>bool</sub> | ⭕ Optional |
+| <sub>`tokens`</sub> | <sub>List of API tokens</sub> | <sub>[]</sub> | <sub>[]string</sub> | <sub>✔️ Required</sub> |
+| <sub>`authenticationHeader`</sub> | <sub>Pass token using Authentication Header</sub> | <sub>true</sub> | <sub>bool</sub> | <sub>⚠️ Note</sub> | 
+| <sub>`authenticationHeaderName`</sub> | <sub>Authentication header name</sub> | <sub>'X-API-TOKEN'</sub> | <sub>string</sub> | <sub>⭕ Optional</sub> | 
+| <sub>`authenticationErrorMsg`</sub> | <sub>Error message to display on unsuccessful authentication</sub> | <sub>'Access Denied'</sub> | <sub>string</sub> | <sub>⭕ Optional</sub> |
+| <sub>`bearerHeader`</sub> | <sub>Pass token using Authentication Header Bearer Key</sub> | <sub>true</sub> | <sub>bool</sub> | <sub>⚠️ Note</sub> |
+| <sub>`bearerHeaderName`</sub> | <sub>Authentication bearer header name</sub> | <sub>'Authorization'</sub> | <sub>string</sub> | <sub>⭕ Optional</sub> |
+| <sub>`removeHeadersOnSuccess`</sub> | <sub>If `true`; remove header on successful authentication</sub> | <sub>true</sub> | <sub>bool</sub> | <sub>⭕ Optional</sub> |
+| <sub>`removeTokenNameOnFailure`</sub> | <sub>Don't display name of token in unsuccessful error message</sub> | <sub>false</sub> | <sub>bool</sub> | <sub>⭕ Optional</sub> |
+| <sub>`timestampUnix`</sub> | <sub>Display datetime in Unix timestamp instead of UnixDate</sub> | <sub>false</sub> | <sub>bool</sub> | <sub>⭕ Optional</sub> |
 
 <br />
 
