@@ -1,7 +1,7 @@
 ﻿displayName: API Key Middleware
 type: middleware
 iconPath: .assets/logo.png
-import: github.com/Aetherinox/traefik-middleware-apikey
+import: github.com/Aetherinox/traefik-apikey-middleware
 summary: "Seamless API key integration"
 
 testData:

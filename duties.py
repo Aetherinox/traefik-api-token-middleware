@@ -12,8 +12,8 @@ from typing import Optional
 
 from duty import duty
 
-PACKAGE_NAME = "traefik-middleware-apikey"
-REPO_URL = "https://github.com/Aetherinox/traefik-middleware-apikey"
+PACKAGE_NAME = "traefik-apikey-middleware"
+REPO_URL = "https://github.com/Aetherinox/traefik-apikey-middleware"
 
 
 @duty

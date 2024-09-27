@@ -1,4 +1,4 @@
-# traefik-middleware-apikey 
+# traefik-apikey-middleware 
 
 This plugin allows you to protect routes with an API key specified in a header. If the user does not provide a valid key the middleware will return a 403.
 
@@ -26,16 +26,16 @@ Add to your Traefik static configuration
 ```yaml
 experimental:
   plugins:
-    traefik-middleware-apikey:
-      moduleName: "github.com/Aetherinox/traefik-middleware-apikey"
+    traefik-apikey-middleware:
+      moduleName: "github.com/Aetherinox/traefik-apikey-middleware"
       version: "v1.0.0"
 ```
 
 #### toml
 
 ```toml
-[experimental.plugins.traefik-middleware-apikey]
-  moduleName = "github.com/Aetherinox/traefik-middleware-apikey"
+[experimental.plugins.traefik-apikey-middleware]
+  moduleName = "github.com/Aetherinox/traefik-apikey-middleware"
   version = "v1.0.0"
 ```
 
@@ -44,8 +44,8 @@ experimental:
 Add to your startup args:
 
 ```sh
---experimental.plugins.traefik-middleware-apikey.modulename=github.com/Aetherinox/traefik-middleware-apikey
---experimental.plugins.traefik-middleware-apikey.version=v1.0.0
+--experimental.plugins.traefik-apikey-middleware.modulename=github.com/Aetherinox/traefik-apikey-middleware
+--experimental.plugins.traefik-apikey-middleware.version=v1.0.0
 ```
 
 ### Dynamic configuration
@@ -59,7 +59,7 @@ http:
   middlewares:
     verify-api-key:
       plugin:
-        traefik-middleware-apikey:
+        traefik-apikey-middleware:
           authenticationHeader: true
           authenticationHeaderName: X-API-KEY
           bearerHeader: true
@@ -76,7 +76,7 @@ http:
   [http.middlewares]
     [http.middlewares.verify-api-key]
       [http.middlewares.verify-api-key.plugin]
-        [http.middlewares.verify-api-key.plugin.traefik-middleware-apikey]
+        [http.middlewares.verify-api-key.plugin.traefik-apikey-middleware]
           authenticationHeader = true
           authenticationHeaderName = "X-API-KEY"
           bearerHeader = true
@@ -94,7 +94,7 @@ metadata:
   name: verify-api-key
 spec:
   plugin:
-    traefik-middleware-apikey:
+    traefik-apikey-middleware:
       authenticationHeader: true
       authenticationHeaderName: X-API-KEY
       bearerHeader: true

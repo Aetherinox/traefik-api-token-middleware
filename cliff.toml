@@ -12,9 +12,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 # https://tera.netlify.app/docs/#introduction
 body = """
 {% if version %}\
-    ## [{{ version }}](https://github.com/Aetherinox/traefik-middleware-apikey/commits/{{ version }}) - {{ timestamp | date(format="%Y-%m-%d") }}
+    ## [{{ version }}](https://github.com/Aetherinox/traefik-apikey-middleware/commits/{{ version }}) - {{ timestamp | date(format="%Y-%m-%d") }}
     {% if previous.version %}\
-    <small>[Compare with {{ previous.version }}](https://github.com/Aetherinox/traefik-middleware-apikey/compare/{{ previous.version }}...{{ version }})</small>
+    <small>[Compare with {{ previous.version }}](https://github.com/Aetherinox/traefik-apikey-middleware/compare/{{ previous.version }}...{{ version }})</small>
     {% endif %}\
 {% else %}\
     ## [unreleased]
@@ -22,7 +22,7 @@ body = """
 {% for group, commits in commits | group_by(attribute="group") %}
     ### {{ group | upper_first }}
     {% for commit in commits %}
-        - {% if commit.breaking %}💥 **breaking**: {% endif %}{{ commit.message | upper_first }} ([{{ commit.id | truncate(length=7, end="") }}](https://github.com/Aetherinox/traefik-middleware-apikey/commit/{{ commit.id }}))\
+        - {% if commit.breaking %}💥 **breaking**: {% endif %}{{ commit.message | upper_first }} ([{{ commit.id | truncate(length=7, end="") }}](https://github.com/Aetherinox/traefik-apikey-middleware/commit/{{ commit.id }}))\
         {% if commit.breaking %}\n\n{{commit.footers.0 | upper_first}}{% endif %}\
     {% endfor %}\
 {% endfor %}\n
