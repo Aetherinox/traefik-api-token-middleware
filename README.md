@@ -381,7 +381,7 @@ Once you install the browser extension above, open the **settings**.
 
 <br />
 
-<p align="center"><img style="width: 50%;text-align: center;" src="https://github.com/user-attachments/assets/309b841d-1c74-447a-82d5-a4a508811a8a"></p>
+<p align="center"><img style="width: 50%;text-align: center;" src="https://raw.githubusercontent.com/Aetherinox/traefik-api-token-middleware/refs/heads/main/docs/img/verify-headers/1.gif"></p>
 
 <br />
 
