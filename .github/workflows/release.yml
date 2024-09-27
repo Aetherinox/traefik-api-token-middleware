@@ -222,7 +222,7 @@ jobs:
               uses: rickstaa/action-create-tag@v1
               id: task_release_tag
               with:
-                tag: ${{ inputs.PLUGIN_VERSION }}
+                tag: v${{ inputs.PLUGIN_VERSION }}
                 tag_exists_error: false
                 message: "Latest release"
                 gpg_private_key: ${{ secrets.ADMINSERV_GPG_KEY_ASC }}
