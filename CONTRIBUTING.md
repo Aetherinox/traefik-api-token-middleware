@@ -297,8 +297,8 @@ When writing your code, set your IDE to utilize **spaces**, with a configured si
   [contribs-all-uri]: https://github.com/all-contributors/all-contributors
 
 <!-- BADGE > GITHUB > BUILD > NPM -->
-  [github-build-img]: https://img.shields.io/github/actions/workflow/status/Aetherinox/traefik-api-token-middleware/deb_build.yml?logo=github&logoColor=FFFFFF&label=Build&color=%23278b30
-  [github-build-uri]: https://github.com/Aetherinox/traefik-api-token-middleware/actions/workflows/deb_build.yml
+  [github-build-img]: https://img.shields.io/github/actions/workflow/status/Aetherinox/traefik-api-token-middleware/release.yml?logo=github&logoColor=FFFFFF&label=Build&color=%23278b30
+  [github-build-uri]: https://github.com/Aetherinox/traefik-api-token-middleware/actions/workflows/release.yml
 
 <!-- BADGE > GITHUB > BUILD > Pypi -->
   [github-build-pypi-img]: https://img.shields.io/github/actions/workflow/status/Aetherinox/traefik-api-token-middleware/release-pypi.yml?logo=github&logoColor=FFFFFF&label=Build&color=%23278b30

@@ -24,6 +24,7 @@ This Traefik middleware allows you to secure certain routes behind a request hea
 <!-- prettier-ignore-start -->
 [![Version][github-version-img]][github-version-uri]
 [![Downloads][github-downloads-img]][github-downloads-uri]
+[![Build Status][github-build-img]][github-build-uri]
 [![Size][github-size-img]][github-size-img]
 [![Last Commit][github-commit-img]][github-commit-img]
 [![Contributors][contribs-all-img]](#contributors-)
@@ -702,16 +703,16 @@ The following people have helped get this project going:
   [contribs-all-uri]: https://github.com/all-contributors/all-contributors
 
 <!-- BADGE > GITHUB > BUILD > NPM -->
-  [github-build-img]: https://img.shields.io/github/actions/workflow/status/Aetherinox/traefik-api-token-middleware/npm-release.yml?logo=github&logoColor=FFFFFF&label=Build&color=%23278b30
-  [github-build-uri]: https://github.com/Aetherinox/traefik-api-token-middleware/actions/workflows/npm-release.yml
+  [github-build-img]: https://img.shields.io/github/actions/workflow/status/Aetherinox/traefik-api-token-middleware/release.yml?logo=github&logoColor=FFFFFF&label=Build&color=%23278b30
+  [github-build-uri]: https://github.com/Aetherinox/traefik-api-token-middleware/actions/workflows/release.yml
 
 <!-- BADGE > GITHUB > BUILD > Pypi -->
   [github-build-pypi-img]: https://img.shields.io/github/actions/workflow/status/Aetherinox/traefik-api-token-middleware/release-pypi.yml?logo=github&logoColor=FFFFFF&label=Build&color=%23278b30
   [github-build-pypi-uri]: https://github.com/Aetherinox/traefik-api-token-middleware/actions/workflows/pypi-release.yml
 
 <!-- BADGE > GITHUB > TESTS -->
-  [github-tests-img]: https://img.shields.io/github/actions/workflow/status/Aetherinox/traefik-api-token-middleware/npm-tests.yml?logo=github&label=Tests&color=2c6488
-  [github-tests-uri]: https://github.com/Aetherinox/traefik-api-token-middleware/actions/workflows/npm-tests.yml
+  [github-tests-img]: https://img.shields.io/github/actions/workflow/status/Aetherinox/traefik-api-token-middleware/tests.yml?logo=github&label=Tests&color=2c6488
+  [github-tests-uri]: https://github.com/Aetherinox/traefik-api-token-middleware/actions/workflows/tests.yml
 
 <!-- BADGE > GITHUB > COMMIT -->
   [github-commit-img]: https://img.shields.io/github/last-commit/Aetherinox/traefik-api-token-middleware?logo=conventionalcommits&logoColor=FFFFFF&label=Last%20Commit&color=313131
