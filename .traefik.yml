@@ -1,0 +1,14 @@
+﻿displayName: API Key Middleware
+type: middleware
+iconPath: .assets/logo.png
+import: github.com/Aetherinox/traefik-middleware-apikey
+summary: "Seamless API key integration"
+
+testData:
+  authenticationHeader: true
+  authenticationheaderName: X-API-KEY
+  bearerHeader: true
+  bearerHeaderName: Authorization
+  removeHeadersOnSuccess: true
+  keys:
+    - 10854495-364f-4f73-aa6a-a71b317fc0b1
