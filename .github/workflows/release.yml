@@ -7,7 +7,7 @@ on:
 
       # ---------------------------------------------------------------------------------------
       #   Name of the plugin to use when creating the release zip filename
-      #     e.g: traefik-api-token-middleware-v1.0.0.zip
+      #     e.g: traefik-api-token-middleware-v0.1.0.zip
       # ---------------------------------------------------------------------------------------
 
       PLUGIN_NAME:
@@ -18,13 +18,13 @@ on:
 
       # ---------------------------------------------------------------------------------------
       #   Version to release
-      #     e.g: v1.0.0
+      #     e.g: v0.1.0
       # ---------------------------------------------------------------------------------------
 
       PLUGIN_VERSION:
         description:  "📦 Version"
         required:     true
-        default:      '1.x.x'
+        default:      '0.1.0'
         type:         string
 
       # ---------------------------------------------------------------------------------------
@@ -65,14 +65,14 @@ on:
       # ---------------------------------------------------------------------------------------
       #   Release Candidate version number
       #   this will be added to the end of your released app in the releases page.
-      #     e.g: traefik-api-token-middleware-v1.0.0-rc.1
+      #     e.g: traefik-api-token-middleware-v0.1.0-rc.1
       # ---------------------------------------------------------------------------------------
 
       VERSION_RC:
         description:  "🧪 RC (Pre-release) Ver (traefik-api-token-middleware-rc.v1)"
         required:     false
         type:         string
-        default:      "1"
+        default:      "0.1.0"
 
 # ---------------------------------------------------------------------------------------
 #   environment variables
@@ -136,7 +136,7 @@ jobs:
               id: task_tag_previous
               uses: "WyriHaximus/github-action-get-previous-tag@v1"
               with:
-                fallback: 1.0.0
+                fallback: 0.1.0
 
             # ---------------------------------------------------------------------------------------
             #   Job > Print Current Version
