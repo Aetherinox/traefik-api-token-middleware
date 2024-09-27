@@ -83,7 +83,7 @@ func New(ctx context.Context, next http.Handler, config *Config, name string) (h
 	*/
 
 	if len(config.Tokens) == 0 {
-		return nil, fmt.Errorf("must specify at least one valid token")
+		return nil, fmt.Errorf("Must specify at least one valid api token in plugin configurations")
 	}
 
 	/*
@@ -91,7 +91,7 @@ func New(ctx context.Context, next http.Handler, config *Config, name string) (h
 	*/
 
 	if !config.AuthenticationHeader && !config.BearerHeader {
-		return nil, fmt.Errorf("at least one header type must be true")
+		return nil, fmt.Errorf("Must specify either authenticationHeader or bearerHeader in dynamic configuration")
 	}
 
 	/*
@@ -239,7 +239,7 @@ func (ka *KeyAuth) ServeHTTP(rw http.ResponseWriter, req *http.Request) {
 	var response Response
 	if ka.authenticationHeader && ka.bearerHeader {
 		if !ka.removeTokenNameOnFailure {
-			output = fmt.Sprintf(output + ". Must pass a valid API Token header using either %s: $token or %s: Bearer $key", ka.authenticationHeaderName, ka.bearerHeaderName)
+			output = fmt.Sprintf(output + ". Provide a valid API Token header using either %s: $token or %s: Bearer $key", ka.authenticationHeaderName, ka.bearerHeaderName)
 		}
 
 		response = Response{
@@ -249,7 +249,7 @@ func (ka *KeyAuth) ServeHTTP(rw http.ResponseWriter, req *http.Request) {
 		}
 	} else if ka.authenticationHeader && !ka.bearerHeader {
 		if !ka.removeTokenNameOnFailure {
-			output = fmt.Sprintf(output + ". Must pass a valid API Token header using %s: $token", ka.authenticationHeaderName)
+			output = fmt.Sprintf(output + ". Provide a valid API Token header using %s: $token", ka.authenticationHeaderName)
 		}
 
 		response = Response{
@@ -259,7 +259,7 @@ func (ka *KeyAuth) ServeHTTP(rw http.ResponseWriter, req *http.Request) {
 		}
 	} else if !ka.authenticationHeader && ka.bearerHeader {
 		if !ka.removeTokenNameOnFailure {
-			output = fmt.Sprintf(output + ". Must pass a valid API Token header using %s: Bearer $token", ka.bearerHeaderName)
+			output = fmt.Sprintf(output + ". Provide a valid API Token header using %s: Bearer $token", ka.bearerHeaderName)
 		}
 
 		response = Response{
@@ -287,6 +287,6 @@ func (ka *KeyAuth) ServeHTTP(rw http.ResponseWriter, req *http.Request) {
 			Response can't be written > log error
 		*/
 		
-		fmt.Printf("Error when sending response to an invalid token: %s", err.Error())
+		fmt.Printf("Erroneous response due to invalid api token: %s", err.Error())
 	}
 }
