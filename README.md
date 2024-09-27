@@ -12,7 +12,7 @@ This Traefik middleware allows you to secure certain routes behind a request hea
 
 <br />
 
-<img src="https://github.com/user-attachments/assets/9e4b02a7-1a77-4175-b7c5-149b272d29f7" height="230">
+<img src="https://raw.githubusercontent.com/Aetherinox/traefik-api-token-middleware/refs/heads/main/.assets/plugin_traefik_apikey_middleware.png" height="230">
 
 <br />
 <br />
