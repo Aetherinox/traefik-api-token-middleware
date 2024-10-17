@@ -1,4 +1,4 @@
-﻿displayName: API Token Middleware
+﻿displayName: API Key & Token Middleware
 type: middleware
 iconPath: .assets/logo.png
 import: github.com/Aetherinox/traefik-api-token-middleware
