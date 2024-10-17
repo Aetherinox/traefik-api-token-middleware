@@ -38,6 +38,14 @@ var Gray = "\033[37m"
 var White = "\033[97m"
 
 /*
+	Logging
+*/
+
+var (
+	logInfo = log.New(io.Discard, "INFO: apikey: ", log.Ldate|log.Ltime)
+)
+
+/*
 	Define > Header Values
 */
 
@@ -64,6 +72,7 @@ type Config struct {
 	RemoveTokenNameOnFailure	bool     	`json:"removeTokenNameOnError,omitempty"`
 	TimestampUnix     			bool     	`json:"timestampUnix,omitempty"`
 	WhitelistIPs				[]string 	`yaml:"whitelistIPs,omitempty"`
+	DetailedLogs           		bool     	`json:"detailedLogs,omitempty"`
 }
 
 /*
@@ -92,6 +101,7 @@ func CreateConfig() *Config {
 		RemoveTokenNameOnFailure:	false,
 		TimestampUnix:				false,
 		WhitelistIPs:				make([]string, 0),
+		DetailedLogs:				false,
 	}
 }
 
@@ -107,6 +117,7 @@ type KeyAuth struct {
 	removeTokenNameOnFailure	bool
 	timestampUnix				bool
 	whitelistIPs    			[]net.IP
+	detailedLogs           		bool
 }
 
 func sliceString(a string, list []string) bool {
@@ -192,6 +203,7 @@ func New(ctx context.Context, next http.Handler, config *Config, name string) (h
 		removeTokenNameOnFailure:	config.RemoveTokenNameOnFailure,
 		timestampUnix:   			config.TimestampUnix,
 		whitelistIPs:				whitelistIPs,
+		detailedLogs:				config.DetailedLogs,
 	}, nil
 }
 
