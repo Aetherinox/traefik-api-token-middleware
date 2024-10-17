@@ -214,6 +214,7 @@ This plugin accepts the following parameters:
 | <sub>`removeHeadersOnSuccess`</sub> | <sub>If `true`; remove header on successful authentication</sub> | <sub>true</sub> | <sub>bool</sub> | <sub>⭕ Optional</sub> |
 | <sub>`removeTokenNameOnFailure`</sub> | <sub>Don't display name of token in unsuccessful error message</sub> | <sub>false</sub> | <sub>bool</sub> | <sub>⭕ Optional</sub> |
 | <sub>`timestampUnix`</sub> | <sub>Display datetime in Unix timestamp instead of UnixDate</sub> | <sub>false</sub> | <sub>bool</sub> | <sub>⭕ Optional</sub> |
+| <sub>`whitelistIPs`</sub> | <sub>A list of IP blocks that will bypass the api-token check</sub> | <sub>[]</sub> | <sub>[]string</sub> | <sub>⭕ Optional</sub> |
 
 <br />
 
@@ -282,7 +283,6 @@ Allows you to specify a list of whitelisted IP addresses that will not have the 
 
 <br />
 
-`whitelistIPs:`
 ```yml
 # Dynamic configuration
 http:
