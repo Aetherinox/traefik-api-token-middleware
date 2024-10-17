@@ -15,3 +15,6 @@ testData:
   timestampUnix: false
   tokens:
     - 10854495-364f-4f73-aa6a-a71b317fc0b1
+  whitelistIPs:
+    - "66.85.101.2"
+    - "10.10.0.7/32"
