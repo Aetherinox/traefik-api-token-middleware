@@ -658,6 +658,10 @@ Want to help but can't write code?
 
 <br />
 
+![Alt](https://repobeats.axiom.co/api/embed/3a528b94b5433fa1f9763340435c6071716e7dca.svg "analytics image")
+
+<br />
+
 The following people have helped get this project going:
 
 <br />
