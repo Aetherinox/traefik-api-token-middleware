@@ -10,13 +10,41 @@ package traefik_api_token_middleware
 
 import (
 	"regexp"
+	"io"
 	"context"
 	"fmt"
+	"net"
 	"net/http"
     "time"
+	"strings"
+	"log"
 	"strconv"
 	"encoding/json"
     "os"
+)
+
+/*
+	Define > Color Codes
+*/
+
+var Reset = "\033[0m" 
+var Red = "\033[31m" 
+var Green = "\033[32m" 
+var Yellow = "\033[33m" 
+var Blue = "\033[34m" 
+var Magenta = "\033[35m" 
+var Cyan = "\033[36m" 
+var Gray = "\033[37m" 
+var White = "\033[97m"
+
+/*
+	Define > Header Values
+*/
+
+const (
+	xForwardedFor                      = "X-Forwarded-For"
+	xRealIP                            = "X-Real-IP"
+	countryHeader                      = "X-IPCountry"
 )
 
 /*
@@ -34,9 +62,8 @@ type Config struct {
 	Tokens                     	[]string 	`json:"tokens,omitempty"`
 	RemoveHeadersOnSuccess   	bool     	`json:"removeHeadersOnSuccess,omitempty"`
 	RemoveTokenNameOnFailure	bool     	`json:"removeTokenNameOnError,omitempty"`
-	OtpEnabled 					bool   		`json:"otpEnabled,omitempty"`
-	OtpSecret 					string   	`json:"otpSecret,omitempty"`
 	TimestampUnix     			bool     	`json:"timestampUnix,omitempty"`
+	AllowedIPAddresses			[]string 	`yaml:"allowedIPAddresses,omitempty"`
 }
 
 /*
@@ -63,9 +90,8 @@ func CreateConfig() *Config {
 		Tokens:                  	make([]string, 0),
 		RemoveHeadersOnSuccess:   	true,
 		RemoveTokenNameOnFailure:	false,
-		OtpEnabled:					false,
-		OtpSecret: 					"5G6PLJ5YVBMLK5UA",
 		TimestampUnix:				false,
+		AllowedIPAddresses:			make([]string, 0),
 	}
 }
 
@@ -79,13 +105,60 @@ type KeyAuth struct {
 	tokens                     	[]string
 	removeHeadersOnSuccess   	bool
 	removeTokenNameOnFailure	bool
-	otpEnabled   				bool
-	otpSecret         			string
 	timestampUnix				bool
+	allowedIPAddresses    		[]net.IP
+}
+
+func sliceString(a string, list []string) bool {
+	for _, b := range list {
+		if b == a {
+			return true
+		}
+	}
+
+	return false
+}
+
+func sliceIp(a net.IP, list []net.IP) bool {
+	for _, b := range list {
+		if b.Equal(a) {
+			return true
+		}
+	}
+	return false
+}
+
+func parseIP(addr string) (net.IP, error) {
+	ipAddress := net.ParseIP(addr)
+
+	if ipAddress == nil {
+		return nil, fmt.Errorf("cant parse IP address from address [%s]", addr)
+	}
+
+	return ipAddress, nil
 }
 
 func New(ctx context.Context, next http.Handler, config *Config, name string) (http.Handler, error) {
-	fmt.Printf("Spinning up plugin: %s instance: %+v, ctx: %+v\n", name, *config, ctx)
+	fmt.Printf( Red + "[Aetherx-apikey]: " + Reset + "Starting Plugin " + Magenta + "%s" + Reset + "\n instance: " + Yellow + "%+v" + Reset + "\n ctx: " + Yellow + "%+v \n\n", name, *config, ctx)
+
+	/*
+		Ip whitelist
+	*/
+
+	var allowedIPAddresses []net.IP
+	for _, ipAddressEntry := range config.AllowedIPAddresses {
+		ip, ipBlock, err := net.ParseCIDR(ipAddressEntry)
+		if err == nil {
+			allowedIPAddresses = append(allowedIPAddresses, ip)
+			continue
+		}
+
+		ipAddress := net.ParseIP(ipAddressEntry)
+		if ipAddress == nil {
+			fmt.Printf( Red + "[Aetherx-apikey]: " + Reset + "allowedIPAddresses whitelist contains %s" + Red + "%s" + Reset, "invalid ip address")
+		}
+		allowedIPAddresses = append(allowedIPAddresses, ipAddress)
+	}
 
 	/*
 		Scan for empty tokens / keys
@@ -118,6 +191,7 @@ func New(ctx context.Context, next http.Handler, config *Config, name string) (h
 		removeHeadersOnSuccess:   	config.RemoveHeadersOnSuccess,
 		removeTokenNameOnFailure:	config.RemoveTokenNameOnFailure,
 		timestampUnix:   			config.TimestampUnix,
+		allowedIPAddresses:			allowedIPAddresses,
 	}, nil
 }
 
@@ -167,6 +241,8 @@ func bearer(token string, validTokens []string) bool {
 
 func (ka *KeyAuth) ServeHTTP(rw http.ResponseWriter, req *http.Request) {
 
+	reqIPAddr, err := ka.collectRemoteIP(req)
+
 	/*
 		Authentication Header > check for valid token
 	*/
@@ -206,6 +282,27 @@ func (ka *KeyAuth) ServeHTTP(rw http.ResponseWriter, req *http.Request) {
 			ka.next.ServeHTTP(rw, req)
 
 			return
+		}
+	}
+
+	/*
+		IP Whitelist
+	*/
+
+	if len(ka.allowedIPAddresses) > 0 {
+		fmt.Printf( Red + "[Aetherx-apikey]: " + Reset + "IPs specified in setting " + Magenta + "%s" + Reset, "allowedIPAddresses")
+
+		for _, ipAddress := range reqIPAddr {
+
+			fmt.Printf( Red + "[Aetherx-apikey]: " + Reset + "Checking IP for whitelist access " + Magenta + "%s" + Reset, ipAddress)
+
+			if sliceIp(*ipAddress, ka.allowedIPAddresses) {
+				fmt.Printf( Red + "[Aetherx-apikey]: " + Reset + "Allowing whitelisted IP " + Magenta + "%s" + Reset + " to bypass apikey", ipAddress)
+				req.Header.Del(ka.authenticationHeaderName)
+				req.Header.Del(ka.bearerHeaderName)
+				ka.next.ServeHTTP(rw, req)
+				return
+			}
 		}
 	}
 
@@ -297,6 +394,44 @@ func (ka *KeyAuth) ServeHTTP(rw http.ResponseWriter, req *http.Request) {
 			Response can't be written > log error
 		*/
 		
-		fmt.Printf("Erroneous response due to invalid api token: %s", err.Error())
+		fmt.Printf( Red + "[Aetherx-apikey]: " + Reset + "Erroneous response due to invalid api token: " + Red + "%s" + Reset, err.Error())
 	}
+}
+
+/*
+	Collect Remote IP
+*/
+
+func (a *KeyAuth) collectRemoteIP(req *http.Request) ([]*net.IP, error) {
+	var ipList []*net.IP
+
+	splitFn := func(c rune) bool {
+		return c == ','
+	}
+
+	xForwardedForValue := req.Header.Get(xForwardedFor)
+	xForwardedForIPs := strings.FieldsFunc(xForwardedForValue, splitFn)
+
+	xRealIPValue := req.Header.Get(xRealIP)
+	xRealIPList := strings.FieldsFunc(xRealIPValue, splitFn)
+
+	for _, value := range xForwardedForIPs {
+		ipAddress, err := parseIP(value)
+		if err != nil {
+			return ipList, fmt.Errorf("parsing failed: %s", err)
+		}
+
+		ipList = append(ipList, &ipAddress)
+	}
+
+	for _, value := range xRealIPList {
+		ipAddress, err := parseIP(value)
+		if err != nil {
+			return ipList, fmt.Errorf("parsing failed: %s", err)
+		}
+
+		ipList = append(ipList, &ipAddress)
+	}
+
+	return ipList, nil
 }
