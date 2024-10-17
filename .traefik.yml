@@ -2,7 +2,7 @@
 type: middleware
 iconPath: .assets/logo.png
 import: github.com/Aetherinox/traefik-api-token-middleware
-summary: "Integrate API tokens into the request header for your services."
+summary: "Integrate API tokens into the request header to allow restricted access. Supports IP whitelisting."
 
 testData:
   authenticationHeader: true
