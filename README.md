@@ -52,6 +52,7 @@ This Traefik middleware allows you to secure certain routes behind a request hea
 - [Parameters](#parameters)
   - [authenticationErrorMsg](#authenticationerrormsg)
   - [removeTokenNameOnFailure](#removetokennameonfailure)
+  - [whitelistIPs](#whitelistips)
   - [timestampUnix](#timestampunix)
 - [Full Examples](#full-examples)
 - [Browser Plugins](#browser-plugins)
@@ -271,6 +272,37 @@ This setting changes how error messages are displayed to a user who doesn't prov
   "status_code": 403,
   "timestamp": "1727432498"
 }
+```
+
+<br />
+<br />
+
+### whitelistIPs
+Allows you to specify a list of whitelisted IP addresses that will not have the API-token checked. 
+
+<br />
+
+`whitelistIPs:`
+```yml
+# Dynamic configuration
+http:
+  middlewares:
+    api-token:
+      plugin:
+        traefik-api-token-middleware:
+          authenticationHeader: true
+          authenticationHeaderName: X-API-TOKEN
+          authenticationErrorMsg: "Invalid token"
+          bearerHeader: true
+          bearerHeaderName: Authorization
+          removeHeadersOnSuccess: true
+          removeTokenNameOnFailure: false
+          timestampUnix: false
+          tokens:
+            - your-api-token
+          whitelistIPs:
+            - "66.85.101.2"
+            - "10.10.0.7/32"
 ```
 
 <br />

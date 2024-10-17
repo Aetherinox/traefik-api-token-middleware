@@ -63,7 +63,7 @@ type Config struct {
 	RemoveHeadersOnSuccess   	bool     	`json:"removeHeadersOnSuccess,omitempty"`
 	RemoveTokenNameOnFailure	bool     	`json:"removeTokenNameOnError,omitempty"`
 	TimestampUnix     			bool     	`json:"timestampUnix,omitempty"`
-	AllowedIPAddresses			[]string 	`yaml:"allowedIPAddresses,omitempty"`
+	WhitelistIPs				[]string 	`yaml:"whitelistIPs,omitempty"`
 }
 
 /*
@@ -91,7 +91,7 @@ func CreateConfig() *Config {
 		RemoveHeadersOnSuccess:   	true,
 		RemoveTokenNameOnFailure:	false,
 		TimestampUnix:				false,
-		AllowedIPAddresses:			make([]string, 0),
+		WhitelistIPs:				make([]string, 0),
 	}
 }
 
@@ -106,7 +106,7 @@ type KeyAuth struct {
 	removeHeadersOnSuccess   	bool
 	removeTokenNameOnFailure	bool
 	timestampUnix				bool
-	allowedIPAddresses    		[]net.IP
+	whitelistIPs    			[]net.IP
 }
 
 func sliceString(a string, list []string) bool {
@@ -145,19 +145,19 @@ func New(ctx context.Context, next http.Handler, config *Config, name string) (h
 		Ip whitelist
 	*/
 
-	var allowedIPAddresses []net.IP
-	for _, ipAddressEntry := range config.AllowedIPAddresses {
+	var whitelistIPs []net.IP
+	for _, ipAddressEntry := range config.WhitelistIPs {
 		ip, ipBlock, err := net.ParseCIDR(ipAddressEntry)
 		if err == nil {
-			allowedIPAddresses = append(allowedIPAddresses, ip)
+			whitelistIPs = append(whitelistIPs, ip)
 			continue
 		}
 
 		ipAddress := net.ParseIP(ipAddressEntry)
 		if ipAddress == nil {
-			fmt.Printf( Red + "[Aetherx-apikey]: " + Reset + "allowedIPAddresses whitelist contains %s" + Red + "%s" + Reset, "invalid ip address")
+			fmt.Printf( Red + "[Aetherx-apikey]: " + Reset + "whitelistIPs whitelist contains %s" + Red + "%s" + Reset, "invalid ip address")
 		}
-		allowedIPAddresses = append(allowedIPAddresses, ipAddress)
+		whitelistIPs = append(whitelistIPs, ipAddress)
 	}
 
 	/*
@@ -191,7 +191,7 @@ func New(ctx context.Context, next http.Handler, config *Config, name string) (h
 		removeHeadersOnSuccess:   	config.RemoveHeadersOnSuccess,
 		removeTokenNameOnFailure:	config.RemoveTokenNameOnFailure,
 		timestampUnix:   			config.TimestampUnix,
-		allowedIPAddresses:			allowedIPAddresses,
+		whitelistIPs:				whitelistIPs,
 	}, nil
 }
 
@@ -289,14 +289,14 @@ func (ka *KeyAuth) ServeHTTP(rw http.ResponseWriter, req *http.Request) {
 		IP Whitelist
 	*/
 
-	if len(ka.allowedIPAddresses) > 0 {
-		fmt.Printf( Red + "[Aetherx-apikey]: " + Reset + "IPs specified in setting " + Magenta + "%s" + Reset, "allowedIPAddresses")
+	if len(ka.whitelistIPs) > 0 {
+		fmt.Printf( Red + "[Aetherx-apikey]: " + Reset + "IPs specified in setting " + Magenta + "%s" + Reset, "whitelistIPs")
 
 		for _, ipAddress := range reqIPAddr {
 
 			fmt.Printf( Red + "[Aetherx-apikey]: " + Reset + "Checking IP for whitelist access " + Magenta + "%s" + Reset, ipAddress)
 
-			if sliceIp(*ipAddress, ka.allowedIPAddresses) {
+			if sliceIp(*ipAddress, ka.whitelistIPs) {
 				fmt.Printf( Red + "[Aetherx-apikey]: " + Reset + "Allowing whitelisted IP " + Magenta + "%s" + Reset + " to bypass apikey", ipAddress)
 				req.Header.Del(ka.authenticationHeaderName)
 				req.Header.Del(ka.bearerHeaderName)
