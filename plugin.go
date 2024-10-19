@@ -102,6 +102,8 @@ type Config struct {
 	WhitelistIPs				[]string	`yaml:"whitelistIPs,omitempty"`
 	DetailedLogs				bool		`json:"detailedLogs,omitempty"`
 	InternalErrorRoute			string		`json:"internalErrorRoute,omitempty"`
+	RegexAllow 					[]string 	`json:"regexAllow,omitempty"`
+	RegexDeny					[]string 	`json:"regexDeny,omitempty"`
 }
 
 /*
@@ -131,8 +133,8 @@ func CreateConfig() *Config {
 		RemoveTokenNameOnFailure:	false,
 		TimestampUnix:				false,
 		WhitelistIPs:				make([]string, 0),
-		DetailedLogs:				false,
-		InternalErrorRoute:			"",
+		RegexAllow: 				make([]string, 0),
+		RegexDeny: 					make([]string, 0),
 	}
 }
 
@@ -149,8 +151,8 @@ type KeyAuth struct {
 	removeTokenNameOnFailure	bool
 	timestampUnix				bool
 	whitelistIPs    			[]net.IP
-	detailedLogs           		bool
-	internalErrorRoute			string
+	regexpsAllow 				[]*regexp.Regexp
+	regexpsDeny  				[]*regexp.Regexp
 }
 
 /*
@@ -217,7 +219,34 @@ func New(ctx context.Context, next http.Handler, config *Config, name string) (h
 	logWarn.SetOutput(new(logWriter))
 
 	/*
-		Ip whitelist
+		Regex
+
+		allows you to filter out user-agents based on configured regex rules
+	*/
+
+	regexpsAllow := make([]*regexp.Regexp, len(config.RegexAllow))
+	regexpsDeny := make([]*regexp.Regexp, len(config.RegexDeny))
+
+	for i, regex := range config.RegexAllow {
+		re, err := regexp.Compile(regex)
+		if err != nil {
+			return nil, fmt.Errorf("error compiling regexAllow %q: %w", regex, err)
+		}
+
+		regexpsAllow[i] = re
+	}
+
+	for i, regex := range config.RegexDeny {
+		re, err := regexp.Compile(regex)
+		if err != nil {
+			return nil, fmt.Errorf("error compiling regex %q: %w", regex, err)
+		}
+
+		regexpsDeny[i] = re
+	}
+
+	/*
+		Ip Whitelist
 	*/
 
 	var whitelistIPs []net.IP
@@ -270,6 +299,8 @@ func New(ctx context.Context, next http.Handler, config *Config, name string) (h
 		whitelistIPs:				whitelistIPs,
 		detailedLogs:				config.DetailedLogs,
 		internalErrorRoute:			config.InternalErrorRoute,
+		regexpsAllow: 				regexpsAllow,
+		regexpsDeny:  				regexpsDeny,
 	}, nil
 }
 
@@ -337,9 +368,48 @@ func (ka *KeyAuth) permissiveOk(rw http.ResponseWriter, req *http.Request) {
 func (ka *KeyAuth) ServeHTTP(rw http.ResponseWriter, req *http.Request) {
 
 	reqIPAddr, err := ka.collectRemoteIP(req)
+	bRegexWhitelist := false
+	bRegexBlacklist := false
 
 	for _, ipAddress := range reqIPAddr {
 		logInfo.Printf(Reset + "Initializing new request " + Yellow + "%s" + Reset + " for url " + Yellow + "%s" + Reset, ipAddress, req.URL)
+	/*
+		User-agent > Whitelist
+	*/
+
+	for _, re := range ka.regexpsAllow {
+		if re.MatchString(userAgent) {
+			if ka.debugLogs {
+				logDebug.Printf(Reset + "Client " + Green + "%s" + Reset + " has whitelisted useragent " + Green + "%s" + Reset, userIp, userAgent)
+			}
+			bRegexWhitelist = true
+		}
+	}
+
+	/*
+		User-agent > Blacklist
+	*/
+
+	for _, re := range ka.regexpsDeny {
+		if re.MatchString(userAgent) {
+			if ka.debugLogs {
+				logDebug.Printf(Reset + "Client " + Red + "%s" + Reset + " has blacklisted useragent " + Green + "%s" + Reset, userIp, userAgent)
+			}
+			bRegexBlacklist = true
+		}
+	}
+
+	/*
+		Override > User Agent
+	*/
+
+	if bRegexWhitelist {
+		logInfo.Printf(Reset + "Client " + Green + "%s" + Reset + " passed useragent whitelist " + Green + "%s" + Reset, userIp, userAgent)
+
+		req.Header.Del(ka.authenticationHeaderName)
+		req.Header.Del(ka.bearerHeaderName)
+		ka.next.ServeHTTP(rw, req)
+		return
 	}
 
 	/*
@@ -408,19 +478,19 @@ func (ka *KeyAuth) ServeHTTP(rw http.ResponseWriter, req *http.Request) {
 	}
 
 	/*
-		Gather some settings and values
+		Determine Auth Method & return response
 
 		- default output msg
 		- timestamp (Unix Timestamp || UnixDate)
 	*/
 
-	output := "Access Denied"
-	now := time.Now().Format(time.UnixDate) // UnixDate
-
+	if bRegexBlacklist {
+		if !ka.removeTokenNameOnFailure {
+			output = fmt.Sprintf("Blacklisted useragent detected")
     if len(ka.authenticationErrorMsg) > 0 {
         output = ka.authenticationErrorMsg
-    }
-
+		}
+	} else if ka.authenticationHeader && ka.bearerHeader {
 	/*
 		ANSIC 		"Mon Jan _2 15:04:05 2006"
 		UnixDate 	"Mon Jan _2 15:04:05 PST 2006"
