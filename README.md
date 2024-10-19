@@ -495,7 +495,6 @@ http:
         traefik-api-token-middleware:
           authenticationHeader: true
           authenticationHeaderName: X-API-TOKEN
-          authenticationErrorMsg: "Invalid token"
           permissiveMode: true
 ```
 
@@ -531,6 +530,7 @@ http:
           removeTokenNameOnFailure: false
           timestampUnix: false
           permissiveMode: false
+          debugLogs: true
           tokens:
             - your-api-token
 
