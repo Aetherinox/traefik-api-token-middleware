@@ -170,7 +170,9 @@ http:
           removeTokenNameOnFailure = false
           timestampUnix = false
           permissiveMode = false
+          debugLogs = false
           tokens = ["your-api-token"]
+          whitelistIPs = ["66.85.101.2", "10.10.0.7/32"]
 ```
 
 <br />
@@ -349,6 +351,10 @@ This setting changes how the date / time will be displayed in your API callback 
 {
   "message": "Access Denied. Provide a valid API Token header using either X-API-TOKEN: $token or Authorization: Bearer $token",
   "status_code": 403,
+  "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:130.0) Gecko/20100101 Firefox/130.0",
+  "ip": "XX.XX.XX.XX",
+  "host": "sub.domain.lan",
+  "uri": "/",
   "timestamp": "1727432498"
 }
 ```
@@ -360,6 +366,10 @@ This setting changes how the date / time will be displayed in your API callback 
 {
   "message": "Access Denied. Provide a valid API Token header using either X-API-TOKEN: $token or Authorization: Bearer $token",
   "status_code": 403,
+  "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:130.0) Gecko/20100101 Firefox/130.0",
+  "ip": "XX.XX.XX.XX",
+  "host": "sub.domain.lan",
+  "uri": "/",
   "timestamp": "Fri Sep 27 03:24:27 UTC 2024"
 }
 ```
@@ -625,7 +635,7 @@ experimental:
   localPlugins:
     traefik-api-token-middleware:
       moduleName: "github.com/Aetherinox/traefik-api-token-middleware"
-      version: "v0.1.0"
+      version: "v0.1.4"
 ```
 
 <br />
@@ -636,7 +646,7 @@ experimental:
 # Static configuration
 [experimental.localPlugins.traefik-api-token-middleware]
   moduleName = "github.com/Aetherinox/traefik-api-token-middleware"
-  version = "v0.1.0"
+  version = "v0.1.4"
 ```
 
 <br />
