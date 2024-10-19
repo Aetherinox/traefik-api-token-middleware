@@ -6,7 +6,7 @@
 
 <p>
 
-This Traefik middleware allows you to secure certain routes behind a request header API token. Users who have not successfully authenticated will be greeted with a **403 Forbidden Error**.
+This Traefik middleware allows you to secure certain routes behind a request header API token. Users who have not successfully authenticated will be greeted with a **403 Forbidden Error**. Also displays information about each connection including IP address and URL that the user is trying to access.
 
 </p>
 
