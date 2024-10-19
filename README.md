@@ -94,7 +94,7 @@ experimental:
   plugins:
     traefik-api-token-middleware:
       moduleName: "github.com/Aetherinox/traefik-api-token-middleware"
-      version: "v0.1.0"
+      version: "v0.1.4"
 ```
 
 <br />
@@ -105,7 +105,7 @@ experimental:
 ## Static configuration
 [experimental.plugins.traefik-api-token-middleware]
   moduleName = "github.com/Aetherinox/traefik-api-token-middleware"
-  version = "v0.1.0"
+  version = "v0.1.4"
 ```
 
 <br />
@@ -115,7 +115,7 @@ experimental:
 ```bash
 ## Static configuration
 --experimental.plugins.traefik-api-token-middleware.modulename=github.com/Aetherinox/traefik-api-token-middleware
---experimental.plugins.traefik-api-token-middleware.version=v0.1.0
+--experimental.plugins.traefik-api-token-middleware.version=v0.1.4
 ```
 
 <br />
@@ -141,8 +141,11 @@ http:
           bearerHeaderName: Authorization
           removeHeadersOnSuccess: true
           removeTokenNameOnFailure: false
+          debugLogs: false
           timestampUnix: false
           permissiveMode: false
+          regexDeny:
+              - '\buseragent1\b'
           tokens:
             - your-api-token
 ```
@@ -190,8 +193,11 @@ spec:
       bearerHeaderName: Authorization
       removeHeadersOnSuccess: true
       removeTokenNameOnFailure: false
+      debugLogs: false
       timestampUnix: false
       permissiveMode: false
+      regexDeny:
+          - '\buseragent1\b'
       tokens:
         - your-api-token
 ```
@@ -219,7 +225,9 @@ This plugin accepts the following parameters:
 | <sub>`removeTokenNameOnFailure`</sub> | <sub>Don't display name of token in unsuccessful error message</sub> | <sub>false</sub> | <sub>bool</sub> | <sub>⭕ Optional</sub> |
 | <sub>`timestampUnix`</sub> | <sub>Display datetime in Unix timestamp instead of UnixDate</sub> | <sub>false</sub> | <sub>bool</sub> | <sub>⭕ Optional</sub> |
 | <sub>`whitelistIPs`</sub> | <sub>A list of IP blocks that will bypass the api-token check</sub> | <sub>[]</sub> | <sub>[]string</sub> | <sub>⭕ Optional</sub> |
+| <sub>`regexDeny`</sub> | <sub>Blacklist list of useragents from accessing routes</sub> | <sub>[]</sub> | <sub>[]string</sub> | <sub>⭕ Optional</sub> |
 | <sub>`permissiveMode`</sub> | <sub>Execute a dry-run, allows access even if a token is invalid</sub> | <sub>false</sub> | <sub>bool</sub> | <sub>⭕ Optional</sub> |
+| <sub>`debugLogs`</sub> | <sub>Shows debug logs in console</sub> | <sub>false</sub> | <sub>bool</sub> | <sub>⭕ Optional</sub> |
 
 <br />
 
@@ -234,9 +242,14 @@ This setting changes the text at the beginning of an error message when an inval
 
 `authenticationErrorMsg: `
 ```json
+
 {
   "message": "Access Denied. Provide a valid API Token header using either X-API-TOKEN: $token or Authorization: Bearer $token",
   "status_code": 403,
+  "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:130.0) Gecko/20100101 Firefox/130.0",
+  "ip": "XX.XX.XX.XX",
+  "host": "sub.domain.lan",
+  "uri": "/",
   "timestamp": "Fri Sep 27 03:24:27 UTC 2024"
 }
 ```
@@ -248,6 +261,10 @@ This setting changes the text at the beginning of an error message when an inval
 {
   "message": "You cannot access this API. Provide a valid API Token header using either X-API-TOKEN: $token or Authorization: Bearer $token",
   "status_code": 403,
+  "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:130.0) Gecko/20100101 Firefox/130.0",
+  "ip": "XX.XX.XX.XX",
+  "host": "sub.domain.lan",
+  "uri": "/",
   "timestamp": "Fri Sep 27 03:24:27 UTC 2024"
 }
 ```
@@ -265,6 +282,10 @@ This setting changes how error messages are displayed to a user who doesn't prov
 {
   "message": "Access Denied. Provide a valid API Token header using either X-API-TOKEN: $token or Authorization: Bearer $token",
   "status_code": 403,
+  "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:130.0) Gecko/20100101 Firefox/130.0",
+  "ip": "XX.XX.XX.XX",
+  "host": "sub.domain.lan",
+  "uri": "/",
   "timestamp": "1727432498"
 }
 ```
@@ -276,6 +297,10 @@ This setting changes how error messages are displayed to a user who doesn't prov
 {
   "message": "Access Denied.",
   "status_code": 403,
+  "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:130.0) Gecko/20100101 Firefox/130.0",
+  "ip": "XX.XX.XX.XX",
+  "host": "sub.domain.lan",
+  "uri": "/",
   "timestamp": "1727432498"
 }
 ```

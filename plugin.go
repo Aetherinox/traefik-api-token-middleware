@@ -581,7 +581,7 @@ func (ka *KeyAuth) ServeHTTP(rw http.ResponseWriter, req *http.Request) {
 		Message:    	output,
 		StatusCode: 	http.StatusForbidden,
 		UserAgent:  	userAgent,
-		RemoteAddr: 	req.RemoteAddr,
+		RemoteAddr: 	userIp,
 		Host:       	req.Host,
 		RequestURI: 	req.RequestURI,
 		Timestamp: 		now,
