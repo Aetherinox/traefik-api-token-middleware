@@ -54,6 +54,7 @@ This Traefik middleware allows you to secure certain routes behind a request hea
   - [removeTokenNameOnFailure](#removetokennameonfailure)
   - [whitelistIPs](#whitelistips)
   - [timestampUnix](#timestampunix)
+  - [permissiveMode](#permissivemode)
 - [Full Examples](#full-examples)
 - [Browser Plugins](#browser-plugins)
   - [Firefox](#firefox)
@@ -141,6 +142,7 @@ http:
           removeHeadersOnSuccess: true
           removeTokenNameOnFailure: false
           timestampUnix: false
+          permissiveMode: false
           tokens:
             - your-api-token
 ```
@@ -164,6 +166,7 @@ http:
           removeHeadersOnSuccess = true
           removeTokenNameOnFailure = false
           timestampUnix = false
+          permissiveMode = false
           tokens = ["your-api-token"]
 ```
 
@@ -188,6 +191,7 @@ spec:
       removeHeadersOnSuccess: true
       removeTokenNameOnFailure: false
       timestampUnix: false
+      permissiveMode: false
       tokens:
         - your-api-token
 ```
@@ -299,6 +303,7 @@ http:
           removeHeadersOnSuccess: true
           removeTokenNameOnFailure: false
           timestampUnix: false
+          permissiveMode: false
           tokens:
             - your-api-token
           whitelistIPs:
@@ -335,6 +340,25 @@ This setting changes how the date / time will be displayed in your API callback 
 ```
 
 <br />
+<br />
+
+### permissiveMode
+Allows to execute a dry-run on a request. The request will pass successfully even if the API token is invalid. Used for testing.
+
+```yml
+# Dynamic configuration
+http:
+  middlewares:
+    api-token:
+      plugin:
+        traefik-api-token-middleware:
+          authenticationHeader: true
+          authenticationHeaderName: X-API-TOKEN
+          authenticationErrorMsg: "Invalid token"
+          permissiveMode: true
+```
+
+<br />
 
 ---
 
@@ -359,6 +383,7 @@ http:
           removeHeadersOnSuccess: true
           removeTokenNameOnFailure: false
           timestampUnix: false
+          permissiveMode: false
           tokens:
             - your-api-token
 
