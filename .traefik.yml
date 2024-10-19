@@ -13,6 +13,7 @@ testData:
   removeHeadersOnSuccess: true
   removeTokenNameOnFailure: false
   timestampUnix: false
+  permissiveMode: false
   tokens:
     - 10854495-364f-4f73-aa6a-a71b317fc0b1
   whitelistIPs:
