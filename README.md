@@ -50,12 +50,18 @@ This Traefik middleware allows you to secure certain routes behind a request hea
     - [File (TOML)](#file-toml-1)
     - [Kubernetes Custom Resource Definition](#kubernetes-custom-resource-definition)
 - [Parameters](#parameters)
+  - [authenticationHeader](#authenticationheader)
   - [authenticationErrorMsg](#authenticationerrormsg)
+  - [bearerHeader](#bearerheader)
+  - [tokens](#tokens)
+  - [removeHeadersOnSuccess](#removeheadersonsuccess)
   - [removeTokenNameOnFailure](#removetokennameonfailure)
-  - [whitelistIPs](#whitelistips)
-  - [regexDeny](#regexdeny)
   - [timestampUnix](#timestampunix)
+  - [whitelistIPs](#whitelistips)
+  - [agentDeny](#agentdeny)
+  - [agentAllow](#agentallow)
   - [permissiveMode](#permissivemode)
+  - [debugLogs](#debuglogs)
 - [Full Examples](#full-examples)
 - [Browser Plugins](#browser-plugins)
   - [Firefox](#firefox)
@@ -142,13 +148,18 @@ http:
           bearerHeaderName: Authorization
           removeHeadersOnSuccess: true
           removeTokenNameOnFailure: false
-          debugLogs: false
           timestampUnix: false
           permissiveMode: false
-          regexDeny:
-              - '\buseragent1\b'
+          debugLogs: false
+          agentDeny:
+            - '\buseragent1\b'
+          agentAllow:
+            - '\buseragent2\b'
           tokens:
             - your-api-token
+          whitelistIPs:
+            - '66.85.101.2'
+            - '10.10.0.7/32'
 ```
 
 <br />
@@ -172,6 +183,8 @@ http:
           timestampUnix = false
           permissiveMode = false
           debugLogs = false
+          agentDeny = ["\buseragent1\b"]
+          agentAllow = ["\buseragent2\b"]
           tokens = ["your-api-token"]
           whitelistIPs = ["66.85.101.2", "10.10.0.7/32"]
 ```
@@ -196,11 +209,13 @@ spec:
       bearerHeaderName: Authorization
       removeHeadersOnSuccess: true
       removeTokenNameOnFailure: false
-      debugLogs: false
       timestampUnix: false
       permissiveMode: false
-      regexDeny:
-          - '\buseragent1\b'
+      debugLogs: false
+      agentDeny:
+        - '\buseragent1\b'
+      agentAllow:
+        - '\buseragent2\b'
       tokens:
         - your-api-token
 ```
@@ -218,17 +233,18 @@ This plugin accepts the following parameters:
 
 | Parameter | Description | Default | Type | Required |
 | --- | --- | --- | --- | --- |
-| <sub>`tokens`</sub> | <sub>List of API tokens</sub> | <sub>[]</sub> | <sub>[]string</sub> | <sub>✔️ Required</sub> |
 | <sub>`authenticationHeader`</sub> | <sub>Pass token using Authentication Header</sub> | <sub>true</sub> | <sub>bool</sub> | <sub>⚠️ Note</sub> | 
 | <sub>`authenticationHeaderName`</sub> | <sub>Authentication header name</sub> | <sub>'X-API-TOKEN'</sub> | <sub>string</sub> | <sub>⭕ Optional</sub> | 
 | <sub>`authenticationErrorMsg`</sub> | <sub>Error message to display on unsuccessful authentication</sub> | <sub>'Access Denied'</sub> | <sub>string</sub> | <sub>⭕ Optional</sub> |
 | <sub>`bearerHeader`</sub> | <sub>Pass token using Authentication Header Bearer Key</sub> | <sub>true</sub> | <sub>bool</sub> | <sub>⚠️ Note</sub> |
 | <sub>`bearerHeaderName`</sub> | <sub>Authentication bearer header name</sub> | <sub>'Authorization'</sub> | <sub>string</sub> | <sub>⭕ Optional</sub> |
+| <sub>`tokens`</sub> | <sub>List of API tokens</sub> | <sub>[]</sub> | <sub>[]string</sub> | <sub>✔️ Required</sub> |
 | <sub>`removeHeadersOnSuccess`</sub> | <sub>If `true`; remove header on successful authentication</sub> | <sub>true</sub> | <sub>bool</sub> | <sub>⭕ Optional</sub> |
 | <sub>`removeTokenNameOnFailure`</sub> | <sub>Don't display name of token in unsuccessful error message</sub> | <sub>false</sub> | <sub>bool</sub> | <sub>⭕ Optional</sub> |
 | <sub>`timestampUnix`</sub> | <sub>Display datetime in Unix timestamp instead of UnixDate</sub> | <sub>false</sub> | <sub>bool</sub> | <sub>⭕ Optional</sub> |
 | <sub>`whitelistIPs`</sub> | <sub>A list of IP blocks that will bypass the api-token check</sub> | <sub>[]</sub> | <sub>[]string</sub> | <sub>⭕ Optional</sub> |
-| <sub>`regexDeny`</sub> | <sub>Blacklist list of useragents from accessing routes<br>Stacks on top of the authorization token</sub> | <sub>[]</sub> | <sub>[]string</sub> | <sub>⭕ Optional</sub> |
+| <sub>`agentDeny`</sub> | <sub>Blacklist list of useragents from accessing routes<br>Stacks on top of the authorization token</sub> | <sub>[]</sub> | <sub>[]string</sub> | <sub>⭕ Optional</sub> |
+| <sub>`agentAllow`</sub> | <sub>Whitelist list of useragents to access routes<br>Stacks on top of the authorization token</sub> | <sub>[]</sub> | <sub>[]string</sub> | <sub>⭕ Optional</sub> |
 | <sub>`permissiveMode`</sub> | <sub>Execute a dry-run, allows access even if a token is invalid</sub> | <sub>false</sub> | <sub>bool</sub> | <sub>⭕ Optional</sub> |
 | <sub>`debugLogs`</sub> | <sub>Shows debug logs in console</sub> | <sub>false</sub> | <sub>bool</sub> | <sub>⭕ Optional</sub> |
 
@@ -236,6 +252,18 @@ This plugin accepts the following parameters:
 
 - ⚠️: Plugin requires that you enable either `authenticationHeader` OR `bearerHeader`. One of the two **MUST** be enabled.
 
+<br />
+
+### authenticationHeader
+If enabled, will use an **Authentication Header** to pass a token. If you set this to `true`, you must ensure the following are also configured:
+- `authenticationHeaderName`
+- `tokens`
+
+<br />
+
+If you do not wish to use the authentication header, you can alternatively use the [bearerHeader](#bearerheader).
+
+<br />
 <br />
 
 ### authenticationErrorMsg
@@ -271,6 +299,47 @@ This setting changes the text at the beginning of an error message when an inval
   "timestamp": "Fri Sep 27 03:24:27 UTC 2024"
 }
 ```
+
+<br />
+<br />
+
+### bearerHeader
+If enabled, will use an **Bearer Header** to pass a token. If you set this to `true`, you must ensure the following are also configured:
+- `bearerHeaderName`
+- `tokens`
+
+<br />
+
+If you do not wish to use the authentication header, you can alternatively use the [authenticationHeader](#authenticationHeader).
+
+<br />
+<br />
+
+### tokens
+A list of tokens that will accepted for each authentication.
+
+<br />
+
+```yml
+# Dynamic configuration
+http:
+  middlewares:
+    api-token:
+      plugin:
+        traefik-api-token-middleware:
+          authenticationHeader: true
+          authenticationHeaderName: X-API-TOKEN
+          tokens:
+            - your-api-token
+            - second-api-token
+```
+
+<br />
+<br />
+
+### removeHeadersOnSuccess
+If set `true`, the authentication / bearer header will be removed upon successful authentication. Works with both the [authenticationHeader](#authenticationHeader) and [bearerHeader](#bearerHeader).
+
 
 <br />
 <br />
@@ -311,60 +380,6 @@ This setting changes how error messages are displayed to a user who doesn't prov
 <br />
 <br />
 
-### whitelistIPs
-Allows you to specify a list of whitelisted IP addresses that will not have the API-token checked. 
-
-<br />
-
-```yml
-# Dynamic configuration
-http:
-  middlewares:
-    api-token:
-      plugin:
-        traefik-api-token-middleware:
-          authenticationHeader: true
-          authenticationHeaderName: X-API-TOKEN
-          authenticationErrorMsg: "Invalid token"
-          bearerHeader: true
-          bearerHeaderName: Authorization
-          removeHeadersOnSuccess: true
-          removeTokenNameOnFailure: false
-          timestampUnix: false
-          permissiveMode: false
-          tokens:
-            - your-api-token
-          whitelistIPs:
-            - "66.85.101.2"
-            - "10.10.0.7/32"
-```
-
-<br />
-<br />
-
-### regexDeny
-Specifies a list of useragents that cannot access your protected routes. Even if the user has the correct authorization token, they will still be denied if their useragent exists in the deny list. Accesses GoLang regex.
-
-<br />
-
-```yml
-# Dynamic configuration
-http:
-  middlewares:
-    api-token:
-      plugin:
-        traefik-api-token-middleware:
-          authenticationHeader: true
-          authenticationHeaderName: X-API-TOKEN
-          authenticationErrorMsg: "Invalid token"
-          regexDeny:
-              - '\buseragent1\b'
-```
-
-
-<br />
-<br />
-
 ### timestampUnix
 This setting changes how the date / time will be displayed in your API callback / output.
 
@@ -401,6 +416,73 @@ This setting changes how the date / time will be displayed in your API callback 
 <br />
 <br />
 
+### whitelistIPs
+Allows you to specify a list of whitelisted IP addresses that will not have the API-token checked. 
+
+<br />
+
+```yml
+# Dynamic configuration
+http:
+  middlewares:
+    api-token:
+      plugin:
+        traefik-api-token-middleware:
+          authenticationHeader: true
+          authenticationHeaderName: X-API-TOKEN
+          authenticationErrorMsg: 'Invalid token'
+          tokens:
+            - your-api-token
+          whitelistIPs:
+            - '66.85.101.2'
+            - '10.10.0.7/32'
+```
+
+<br />
+<br />
+
+### agentDeny
+Specifies a list of useragents that are **NOT** allowed to access your protected routes. This setting stacks on top of the `Authentication` or `Bearer Token`. If the user has the correct token, but is listed in this deny list; they will be blocked from accessing anything. Utilizes Golang regex rules.
+
+<br />
+
+```yml
+# Dynamic configuration
+http:
+  middlewares:
+    api-token:
+      plugin:
+        traefik-api-token-middleware:
+          authenticationHeader: true
+          authenticationHeaderName: X-API-TOKEN
+          agentDeny:
+              - '\buseragent1\b'
+```
+
+<br />
+<br />
+
+### agentAllow
+Specifies a list of useragents that are allowed to access your protected routes. This setting stacks on top of the `Authentication` or `Bearer Token`. If the user has the correct token, but is not in this allow list; they will be blocked from accessing anything. Utilizes Golang regex rules.
+
+<br />
+
+```yml
+# Dynamic configuration
+http:
+  middlewares:
+    api-token:
+      plugin:
+        traefik-api-token-middleware:
+          authenticationHeader: true
+          authenticationHeaderName: X-API-TOKEN
+          agentAllow:
+              - '\buseragent2\b'
+```
+
+<br />
+<br />
+
 ### permissiveMode
 Allows to execute a dry-run on a request. The request will pass successfully even if the API token is invalid. Used for testing.
 
@@ -416,6 +498,12 @@ http:
           authenticationErrorMsg: "Invalid token"
           permissiveMode: true
 ```
+
+<br />
+<br />
+
+### debugLogs
+If set `true`, gives you a more detailed outline of what is going on behind the scenes in your console. 
 
 <br />
 

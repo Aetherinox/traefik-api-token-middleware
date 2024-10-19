@@ -242,7 +242,7 @@ func New(ctx context.Context, next http.Handler, config *Config, name string) (h
 	for i, regex := range config.AgentAllow {
 		re, err := regexp.Compile(regex)
 		if err != nil {
-			return nil, logErr.Printf(Reset + "Erroneous useragent in deny list using regex: " + Red + "%q" + Reset + " Error: " + Red + "%w" + Reset, regex, err)
+			return nil, fmt.Errorf("error compiling agentAllow %q: %w", regex, err)
 		}
 
 		regexpsAllow[i] = re
@@ -251,7 +251,7 @@ func New(ctx context.Context, next http.Handler, config *Config, name string) (h
 	for i, regex := range config.AgentDeny {
 		re, err := regexp.Compile(regex)
 		if err != nil {
-			return nil, logErr.Printf(Reset + "Erroneous useragent in deny list using regex: " + Red + "%q" + Reset + " Error: " + Red + "%w" + Reset, regex, err)
+			return nil, fmt.Errorf("error compiling regex %q: %w", regex, err)
 		}
 
 		regexpsDeny[i] = re
@@ -271,7 +271,7 @@ func New(ctx context.Context, next http.Handler, config *Config, name string) (h
 
 		ipAddress := net.ParseIP(ipAddressEntry)
 		if ipAddress == nil {
-			logErr.Printf(Reset + "Whistlist contains invalid IP")
+			logInfo.Printf(Reset + "whitelistIPs whitelist contains %s" + Red + "%s" + Reset, "invalid ip address")
 		}
 		whitelistIPs = append(whitelistIPs, ipAddress)
 	}
@@ -281,7 +281,7 @@ func New(ctx context.Context, next http.Handler, config *Config, name string) (h
 	*/
 
 	if len(config.Tokens) == 0 {
-		return nil, logErr.Printf(Reset + "Must specify at least one valid API token within plugin configurations" + Reset)
+		return nil, fmt.Errorf("Must specify at least one valid api token in plugin configurations")
 	}
 
 	/*
@@ -289,7 +289,7 @@ func New(ctx context.Context, next http.Handler, config *Config, name string) (h
 	*/
 
 	if !config.AuthenticationHeader && !config.BearerHeader {
-		return nil, logErr.Printf(Reset + "Must specify at least one valid API token method within plugin configurations, pick " + Yellow + "authenticationHeader" + Reset + " or " + Yellow + "bearerHeader" + Reset)
+		return nil, fmt.Errorf("Must specify either authenticationHeader or bearerHeader in dynamic configuration")
 	}
 
 	/*
@@ -476,19 +476,6 @@ func (ka *KeyAuth) ServeHTTP(rw http.ResponseWriter, req *http.Request) {
 	}
 
 	/*
-		Override > User Agent
-	*/
-
-	if bRegexWhitelist {
-		logInfo.Printf(Reset + "Client " + Green + "%s" + Reset + " passed useragent whitelist " + Green + "%s" + Reset, userIp, userAgent)
-
-		req.Header.Del(ka.authenticationHeaderName)
-		req.Header.Del(ka.bearerHeaderName)
-		ka.next.ServeHTTP(rw, req)
-		return
-	}
-
-	/*
 		Authentication Header > check for valid token
 	*/
 
@@ -503,9 +490,10 @@ func (ka *KeyAuth) ServeHTTP(rw http.ResponseWriter, req *http.Request) {
 				req.Header.Del(ka.authenticationHeaderName)
 			}
 	
-			ka.next.ServeHTTP(rw, req)
-	
-			return
+			if ( len(ka.regexpsAllow) > 0 && bRegexWhitelist ) || ( !bRegexBlacklist ) {
+				ka.next.ServeHTTP(rw, req)
+				return
+			}
 		}
 	}
 
@@ -524,9 +512,10 @@ func (ka *KeyAuth) ServeHTTP(rw http.ResponseWriter, req *http.Request) {
 				req.Header.Del(ka.bearerHeaderName)
 			}
 
-			ka.next.ServeHTTP(rw, req)
-
-			return
+			if ( len(ka.regexpsAllow) > 0 && bRegexWhitelist ) || ( !bRegexBlacklist ) {
+				ka.next.ServeHTTP(rw, req)
+				return
+			}
 		}
 	}
 
