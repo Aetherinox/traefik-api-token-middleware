@@ -97,14 +97,14 @@ type Config struct {
 	AuthenticationErrorMsg		string		`json:"authenticationErrorMsg,omitempty"`
 	BearerHeader				bool		`json:"bearerHeader,omitempty"`
 	BearerHeaderName			string		`json:"bearerHeaderName,omitempty"`
-	Tokens						[]string	`json:"tokens,omitempty"`
 	PermissiveMode				bool		`json:"permissiveMode,omitempty"`
 	RemoveHeadersOnSuccess		bool		`json:"removeHeadersOnSuccess,omitempty"`
 	RemoveTokenNameOnFailure	bool		`json:"removeTokenNameOnError,omitempty"`
 	TimestampUnix				bool		`json:"timestampUnix,omitempty"`
 	DebugLogs					bool		`json:"debugLogs,omitempty"`
-	DetailedLogs				bool		`json:"detailedLogs,omitempty"`
 	InternalErrorRoute			string		`json:"internalErrorRoute,omitempty"`
+	Tokens						[]string	`json:"tokens,omitempty"`
+	WhitelistIPs				[]string	`yaml:"whitelistIPs,omitempty"`
 	RegexAllow 					[]string 	`json:"regexAllow,omitempty"`
 	RegexDeny					[]string 	`json:"regexDeny,omitempty"`
 }
@@ -117,6 +117,10 @@ type Response struct {
 	Message    	string 	`json:"message"`
 	StatusCode 	int    	`json:"status_code"`
 	Timestamp 	string	`json:"timestamp"`
+	UserAgent	string	`json:"user-agent"`
+	RemoteAddr 	string 	`json:"ip"`
+	Host       	string 	`json:"host"`
+	RequestURI	string	`json:"uri"`
 }
 
 /*
@@ -130,12 +134,13 @@ func CreateConfig() *Config {
 		AuthenticationErrorMsg: 	"Access Denied",
 		BearerHeader:             	true,
 		BearerHeaderName:         	"Authorization",
-		Tokens:                  	make([]string, 0),
 		PermissiveMode:				false,
 		RemoveHeadersOnSuccess:   	true,
 		RemoveTokenNameOnFailure:	false,
 		TimestampUnix:				false,
 		DebugLogs:					false,
+		InternalErrorRoute:			"",
+		Tokens:                  	make([]string, 0),
 		WhitelistIPs:				make([]string, 0),
 		RegexAllow: 				make([]string, 0),
 		RegexDeny: 					make([]string, 0),
@@ -149,12 +154,13 @@ type KeyAuth struct {
 	authenticationErrorMsg   	string
 	bearerHeader             	bool
 	bearerHeaderName         	string
-	tokens                     	[]string
 	permissiveMode				bool
 	removeHeadersOnSuccess   	bool
 	removeTokenNameOnFailure	bool
 	timestampUnix				bool
 	debugLogs           		bool
+	internalErrorRoute			string
+	tokens                     	[]string
 	whitelistIPs    			[]net.IP
 	regexpsAllow 				[]*regexp.Regexp
 	regexpsDeny  				[]*regexp.Regexp
@@ -206,9 +212,6 @@ func parseIP(addr string) (net.IP, error) {
 
 func New(ctx context.Context, next http.Handler, config *Config, name string) (http.Handler, error) {
 	fmt.Printf( Red + "[Aetherx-apikey]: " + Reset + "Starting Plugin " + Magenta + "%s" + Reset + "\n instance: " + Yellow + "%+v" + Reset + "\n ctx: " + Yellow + "%+v \n\n", name, *config, ctx)
-
-	// set output for logging
-	//logInfo.SetOutput(os.Stdout)
 
 	/*
 		@TODO		merge logs
@@ -377,13 +380,43 @@ func (ka *KeyAuth) permissiveOk(rw http.ResponseWriter, req *http.Request) {
 func (ka *KeyAuth) ServeHTTP(rw http.ResponseWriter, req *http.Request) {
 
 	reqIPAddr, err := ka.collectRemoteIP(req)
+	now := time.Now().Format(time.UnixDate) // UnixDate
 	bRegexWhitelist := false
 	bRegexBlacklist := false
+	userAgent := req.UserAgent()
+	userIp := "Unknown"
 	output := "Access Denied"
 	var response Response
 
+	/*
+		ANSIC 		"Mon Jan _2 15:04:05 2006"
+		UnixDate 	"Mon Jan _2 15:04:05 PST 2006"
+		RubyDate 	"Mon Jan 02 15:04:05 -0700 2006"
+		RFC822 		"02 Jan 06 15:04 PST"
+		RFC822Z 	"02 Jan 06 15:04 -0700"
+		RFC850 		"Monday, 02-Jan-06 15:04:05 PST"
+		RFC1123 	"Mon, 02 Jan 2006 15:04:05 PST"
+		RFC1123Z 	"Mon, 02 Jan 2006 15:04:05 -0700"
+		RFC3339 	"2006-01-02T15:04:05Z07:00"
+		RFC3339Nano	"2006-01-02T15:04:05.999999999Z07:00"
+	*/
+
+    if ka.timestampUnix {
+        var ts int = int(time.Now().Unix()) // Unix timestamp
+		now = strconv.Itoa(ts)
+		// int - 
+    }
+
+	/*
+		logs > output user
+		assign user ip to string
+	*/
+
 	for _, ipAddress := range reqIPAddr {
-		logInfo.Printf(Reset + "Initializing new request " + Yellow + "%s" + Reset + " for url " + Yellow + "%s" + Reset, ipAddress, req.URL)
+		userIp = ipAddress.String()
+		logInfo.Printf(Reset + "Initializing new request " + Yellow + "%s" + Reset + " for url " + Yellow + "%s" + Reset, userIp, req.URL)
+	}
+
 	/*
 		User-agent > Whitelist
 	*/
@@ -423,6 +456,23 @@ func (ka *KeyAuth) ServeHTTP(rw http.ResponseWriter, req *http.Request) {
 		logDebug.Printf(Yellow + "%s :" + Reset + " %s ", "RequestURI", req.RequestURI)
 		logDebug.Printf(Yellow + "%s :" + Reset + " %s ", "req.URL", req.URL)
 		logDebug.Printf(Yellow + "%s :" + Reset + " %s ", "Timestamp", now)
+	}
+
+	/*
+		Authentication Error Message
+	*/
+
+    if len(ka.authenticationErrorMsg) > 0 {
+        output = ka.authenticationErrorMsg
+    }
+
+	/*
+		Allows you to use a "Dry-run" to pass no matter what even if no valid token was provided
+	*/
+
+	if ka.permissiveMode {
+		ka.permissiveOk(rw, req)
+		return
 	}
 
 	/*
@@ -507,81 +557,34 @@ func (ka *KeyAuth) ServeHTTP(rw http.ResponseWriter, req *http.Request) {
 
 	/*
 		Determine Auth Method & return response
-
-		- default output msg
-		- timestamp (Unix Timestamp || UnixDate)
 	*/
 
 	if bRegexBlacklist {
 		if !ka.removeTokenNameOnFailure {
 			output = fmt.Sprintf("Blacklisted useragent detected")
-    if len(ka.authenticationErrorMsg) > 0 {
-        output = ka.authenticationErrorMsg
 		}
 	} else if ka.authenticationHeader && ka.bearerHeader {
-	/*
-		ANSIC 		"Mon Jan _2 15:04:05 2006"
-		UnixDate 	"Mon Jan _2 15:04:05 PST 2006"
-		RubyDate 	"Mon Jan 02 15:04:05 -0700 2006"
-		RFC822 		"02 Jan 06 15:04 PST"
-		RFC822Z 	"02 Jan 06 15:04 -0700"
-		RFC850 		"Monday, 02-Jan-06 15:04:05 PST"
-		RFC1123 	"Mon, 02 Jan 2006 15:04:05 PST"
-		RFC1123Z 	"Mon, 02 Jan 2006 15:04:05 -0700"
-		RFC3339 	"2006-01-02T15:04:05Z07:00"
-		RFC3339Nano	"2006-01-02T15:04:05.999999999Z07:00"
-	*/
-
-    if ka.timestampUnix {
-        var ts int = int(time.Now().Unix()) // Unix timestamp
-		now = strconv.Itoa(ts)
-		// int - 
-    }
-
-	/*
-		Allows you to use a "Dry-run" to pass no matter what even if no valid token was provided
-	*/
-
-	if ka.permissiveMode {
-		ka.permissiveOk(rw, req)
-		return
-	}
-
-	/*
-		Determine Auth Method & return response
-	*/
-
-	var response Response
-	if ka.authenticationHeader && ka.bearerHeader {
 		if !ka.removeTokenNameOnFailure {
 			output = fmt.Sprintf(output + ". Provide a valid API Token header using either %s: $token or %s: Bearer $token", ka.authenticationHeaderName, ka.bearerHeaderName)
-		}
-
-		response = Response{
-			Message:    	output,
-			StatusCode: 	http.StatusForbidden,
-			Timestamp: 		now,
 		}
 	} else if ka.authenticationHeader && !ka.bearerHeader {
 		if !ka.removeTokenNameOnFailure {
 			output = fmt.Sprintf(output + ". Provide a valid API Token header using %s: $token", ka.authenticationHeaderName)
 		}
-
-		response = Response{
-			Message:    	output,
-			StatusCode: 	http.StatusForbidden,
-			Timestamp: 		now,
-		}
 	} else if !ka.authenticationHeader && ka.bearerHeader {
 		if !ka.removeTokenNameOnFailure {
 			output = fmt.Sprintf(output + ". Provide a valid API Token header using %s: Bearer $token", ka.bearerHeaderName)
 		}
+	}
 
-		response = Response{
-			Message:    	output,
-			StatusCode: 	http.StatusForbidden,
-			Timestamp: 		now,
-		}
+	response = Response{
+		Message:    	output,
+		StatusCode: 	http.StatusForbidden,
+		UserAgent:  	userAgent,
+		RemoteAddr: 	req.RemoteAddr,
+		Host:       	req.Host,
+		RequestURI: 	req.RequestURI,
+		Timestamp: 		now,
 	}
 
 	/*
