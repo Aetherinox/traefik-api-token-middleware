@@ -68,9 +68,12 @@ func (writer logWriter) Write(bytes []byte) (int, error) {
 	Logging
 */
 
-var ( logInfo = log.New(io.Discard, BPurple + "[ APITOKEN ] " + BlueL + "[INFO] " + Reset + ": ", log.Ldate|log.Ltime) )
-var ( logErr = log.New(io.Discard, BPurple + "[ APITOKEN ] " + RedL + "[ERROR] " + Reset + ": ", log.Ldate|log.Ltime) )
-var ( logWarn = log.New(io.Discard, BPurple + "[ APITOKEN ] " + Orange + "[WARN] " + Reset + ": ", log.Ldate|log.Ltime) )
+var ( 
+	logInfo = log.New(io.Discard, BPurple + "[ APITOKEN ] " + BlueL + "[INFO] " + Reset + ": ", log.Ldate|log.Ltime)
+	logErr = log.New(io.Discard, BPurple + "[ APITOKEN ] " + RedL + "[ERROR] " + Reset + ": ", log.Ldate|log.Ltime)
+	logWarn = log.New(io.Discard, BPurple + "[ APITOKEN ] " + Orange + "[WARN] " + Reset + ": ", log.Ldate|log.Ltime)
+	logDebug = log.New(io.Discard, BPurple + "[ APITOKEN ] " + GrayD + "[Debug] " + Reset + ": ", log.Ldate|log.Ltime)
+)
 
 /*
 	Define > Header Values
@@ -99,7 +102,7 @@ type Config struct {
 	RemoveHeadersOnSuccess		bool		`json:"removeHeadersOnSuccess,omitempty"`
 	RemoveTokenNameOnFailure	bool		`json:"removeTokenNameOnError,omitempty"`
 	TimestampUnix				bool		`json:"timestampUnix,omitempty"`
-	WhitelistIPs				[]string	`yaml:"whitelistIPs,omitempty"`
+	DebugLogs					bool		`json:"debugLogs,omitempty"`
 	DetailedLogs				bool		`json:"detailedLogs,omitempty"`
 	InternalErrorRoute			string		`json:"internalErrorRoute,omitempty"`
 	RegexAllow 					[]string 	`json:"regexAllow,omitempty"`
@@ -132,6 +135,7 @@ func CreateConfig() *Config {
 		RemoveHeadersOnSuccess:   	true,
 		RemoveTokenNameOnFailure:	false,
 		TimestampUnix:				false,
+		DebugLogs:					false,
 		WhitelistIPs:				make([]string, 0),
 		RegexAllow: 				make([]string, 0),
 		RegexDeny: 					make([]string, 0),
@@ -150,6 +154,7 @@ type KeyAuth struct {
 	removeHeadersOnSuccess   	bool
 	removeTokenNameOnFailure	bool
 	timestampUnix				bool
+	debugLogs           		bool
 	whitelistIPs    			[]net.IP
 	regexpsAllow 				[]*regexp.Regexp
 	regexpsDeny  				[]*regexp.Regexp
@@ -206,17 +211,21 @@ func New(ctx context.Context, next http.Handler, config *Config, name string) (h
 	//logInfo.SetOutput(os.Stdout)
 
 	/*
-		@TODO		merge error logs
+		@TODO		merge logs
 	*/
 
 	logInfo.SetFlags(0)
 	logInfo.SetOutput(new(logWriter))
+	// logInfo.SetOutput(os.Stdout)
 
 	logErr.SetFlags(0)
 	logErr.SetOutput(new(logWriter))
 
 	logWarn.SetFlags(0)
 	logWarn.SetOutput(new(logWriter))
+
+	logDebug.SetFlags(0)
+	logDebug.SetOutput(new(logWriter))
 
 	/*
 		Regex
@@ -297,7 +306,7 @@ func New(ctx context.Context, next http.Handler, config *Config, name string) (h
 		removeTokenNameOnFailure:	config.RemoveTokenNameOnFailure,
 		timestampUnix:   			config.TimestampUnix,
 		whitelistIPs:				whitelistIPs,
-		detailedLogs:				config.DetailedLogs,
+		debugLogs:					config.DebugLogs,
 		internalErrorRoute:			config.InternalErrorRoute,
 		regexpsAllow: 				regexpsAllow,
 		regexpsDeny:  				regexpsDeny,
@@ -370,6 +379,8 @@ func (ka *KeyAuth) ServeHTTP(rw http.ResponseWriter, req *http.Request) {
 	reqIPAddr, err := ka.collectRemoteIP(req)
 	bRegexWhitelist := false
 	bRegexBlacklist := false
+	output := "Access Denied"
+	var response Response
 
 	for _, ipAddress := range reqIPAddr {
 		logInfo.Printf(Reset + "Initializing new request " + Yellow + "%s" + Reset + " for url " + Yellow + "%s" + Reset, ipAddress, req.URL)
@@ -397,6 +408,21 @@ func (ka *KeyAuth) ServeHTTP(rw http.ResponseWriter, req *http.Request) {
 			}
 			bRegexBlacklist = true
 		}
+	}
+
+	/*
+		Debug Logs
+		All users should pass this step before being directed to their proper destinations
+	*/
+
+	if ka.debugLogs {
+		logDebug.Printf(Yellow + "%s :" + Reset + " %s ", "UserAgent", userAgent)
+		logDebug.Printf(Yellow + "%s :" + Reset + " %s ", "RemoteAddr", req.RemoteAddr)
+		logDebug.Printf(Yellow + "%s :" + Reset + " %s ", "ipAddress", userIp)
+		logDebug.Printf(Yellow + "%s :" + Reset + " %s ", "Host", req.Host)
+		logDebug.Printf(Yellow + "%s :" + Reset + " %s ", "RequestURI", req.RequestURI)
+		logDebug.Printf(Yellow + "%s :" + Reset + " %s ", "req.URL", req.URL)
+		logDebug.Printf(Yellow + "%s :" + Reset + " %s ", "Timestamp", now)
 	}
 
 	/*
@@ -459,15 +485,17 @@ func (ka *KeyAuth) ServeHTTP(rw http.ResponseWriter, req *http.Request) {
 	*/
 
 	if len(ka.whitelistIPs) > 0 {
-
-		logInfo.Printf(Reset + "Whitelist IP check " + Green + "%s" + Reset, "enabled")
+		if ka.debugLogs {
+			logDebug.Printf(Reset + "Client IP whitelist check " + Green + "%s" + Reset, "enabled")
+		}
 
 		for _, ipAddress := range reqIPAddr {
-
-			logInfo.Printf(Reset + "Whitelist IP check on address: " + Magenta + "%s" + Reset, ipAddress)
+			if ka.debugLogs {
+				logDebug.Printf(Reset + "IP whitelist check initiated on client" + Green + "%s" + Reset + " with useragent " + Green + "%s" + Reset, userIp, userAgent)
+			}
 
 			if sliceIp(*ipAddress, ka.whitelistIPs) {
-				logInfo.Printf(Reset + "Allowing whitelisted IP " + Magenta + "%s" + Reset + " to bypass apikey", ipAddress)
+				logInfo.Printf(Reset + "Client " + Green + "%s" + Reset + " passed IP whitelist override " + Green + "%s" + Reset, userIp, userAgent)
 
 				req.Header.Del(ka.authenticationHeaderName)
 				req.Header.Del(ka.bearerHeaderName)
