@@ -53,6 +53,7 @@ This Traefik middleware allows you to secure certain routes behind a request hea
   - [authenticationErrorMsg](#authenticationerrormsg)
   - [removeTokenNameOnFailure](#removetokennameonfailure)
   - [whitelistIPs](#whitelistips)
+  - [regexDeny](#regexdeny)
   - [timestampUnix](#timestampunix)
   - [permissiveMode](#permissivemode)
 - [Full Examples](#full-examples)
@@ -227,7 +228,7 @@ This plugin accepts the following parameters:
 | <sub>`removeTokenNameOnFailure`</sub> | <sub>Don't display name of token in unsuccessful error message</sub> | <sub>false</sub> | <sub>bool</sub> | <sub>⭕ Optional</sub> |
 | <sub>`timestampUnix`</sub> | <sub>Display datetime in Unix timestamp instead of UnixDate</sub> | <sub>false</sub> | <sub>bool</sub> | <sub>⭕ Optional</sub> |
 | <sub>`whitelistIPs`</sub> | <sub>A list of IP blocks that will bypass the api-token check</sub> | <sub>[]</sub> | <sub>[]string</sub> | <sub>⭕ Optional</sub> |
-| <sub>`regexDeny`</sub> | <sub>Blacklist list of useragents from accessing routes</sub> | <sub>[]</sub> | <sub>[]string</sub> | <sub>⭕ Optional</sub> |
+| <sub>`regexDeny`</sub> | <sub>Blacklist list of useragents from accessing routes<br>Stacks on top of the authorization token</sub> | <sub>[]</sub> | <sub>[]string</sub> | <sub>⭕ Optional</sub> |
 | <sub>`permissiveMode`</sub> | <sub>Execute a dry-run, allows access even if a token is invalid</sub> | <sub>false</sub> | <sub>bool</sub> | <sub>⭕ Optional</sub> |
 | <sub>`debugLogs`</sub> | <sub>Shows debug logs in console</sub> | <sub>false</sub> | <sub>bool</sub> | <sub>⭕ Optional</sub> |
 
@@ -337,6 +338,29 @@ http:
             - "66.85.101.2"
             - "10.10.0.7/32"
 ```
+
+<br />
+<br />
+
+### regexDeny
+Specifies a list of useragents that cannot access your protected routes. Even if the user has the correct authorization token, they will still be denied if their useragent exists in the deny list. Accesses GoLang regex.
+
+<br />
+
+```yml
+# Dynamic configuration
+http:
+  middlewares:
+    api-token:
+      plugin:
+        traefik-api-token-middleware:
+          authenticationHeader: true
+          authenticationHeaderName: X-API-TOKEN
+          authenticationErrorMsg: "Invalid token"
+          regexDeny:
+              - '\buseragent1\b'
+```
+
 
 <br />
 <br />
