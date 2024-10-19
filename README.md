@@ -1,6 +1,6 @@
 <div align="center">
 <h6>Traefik v3 middleware which allows for you to protect certain aspects of your site with an API token.</h6>
-<h2>♾️ Traefik API Token Middleware ♾️</h1>
+<h2>♾️ Traefik API Key & Token Middleware ♾️</h1>
 
 <br />
 
