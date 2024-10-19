@@ -15,35 +15,62 @@ import (
 	"fmt"
 	"net"
 	"net/http"
-    "time"
+	"time"
 	"strings"
 	"log"
 	"strconv"
 	"encoding/json"
-    "os"
+	"os"
 )
 
 /*
 	Define > Color Codes
 */
 
-var Reset = "\033[0m" 
-var Red = "\033[31m" 
-var Green = "\033[32m" 
-var Yellow = "\033[33m" 
-var Blue = "\033[34m" 
-var Magenta = "\033[35m" 
-var Cyan = "\033[36m" 
-var Gray = "\033[37m" 
+var Reset = "\033[0m"
+var Red = "\033[31m"
+var RedL = "\033[91m"
+var Green = "\033[32m"
+var GreenL = "\033[92m"
+var Orange = "\033[33m"
+var Yellow = "\033[93m"
+var Blue = "\033[34m"
+var BlueL = "\033[94m"
+var PurpleL = "\033[95m"
+var Magenta = "\033[35m"
+var Cyan = "\033[36m"
+var Gray = "\033[37m"
+var GrayD = "\033[90m"
 var White = "\033[97m"
+
+var BBlack = "\033[1;30m"
+var BRed = "\033[1;31m"
+var BGreen = "\033[1;32m"
+var BYellow = "\033[1;33m"
+var BBlue = "\033[1;34m"
+var BPurple = "\033[1;35m"
+var BCyan = "\033[1;36m"
+var BWhite = "\033[1;37m"
+
+type logWriter struct {
+}
+
+/*
+	Logs > Writer
+*/
+
+func (writer logWriter) Write(bytes []byte) (int, error) {
+	str := GrayD + time.Now().Format("2006-01-02T15:04:05") + Reset + " " + string(bytes)
+	return io.WriteString(os.Stderr, str)
+}
 
 /*
 	Logging
 */
 
-var (
-	logInfo = log.New(io.Discard, "INFO: apikey: ", log.Ldate|log.Ltime)
-)
+var ( logInfo = log.New(io.Discard, BPurple + "[ APITOKEN ] " + BlueL + "[INFO] " + Reset + ": ", log.Ldate|log.Ltime) )
+var ( logErr = log.New(io.Discard, BPurple + "[ APITOKEN ] " + RedL + "[ERROR] " + Reset + ": ", log.Ldate|log.Ltime) )
+var ( logWarn = log.New(io.Discard, BPurple + "[ APITOKEN ] " + Orange + "[WARN] " + Reset + ": ", log.Ldate|log.Ltime) )
 
 /*
 	Define > Header Values
@@ -62,17 +89,19 @@ const (
 */
 
 type Config struct {
-	AuthenticationHeader     	bool     	`json:"authenticationHeader,omitempty"`
-	AuthenticationHeaderName 	string   	`json:"authenticationHeaderName,omitempty"`
-	AuthenticationErrorMsg 		string   	`json:"authenticationErrorMsg,omitempty"`
-	BearerHeader             	bool     	`json:"bearerHeader,omitempty"`
-	BearerHeaderName         	string   	`json:"bearerHeaderName,omitempty"`
-	Tokens                     	[]string 	`json:"tokens,omitempty"`
-	RemoveHeadersOnSuccess   	bool     	`json:"removeHeadersOnSuccess,omitempty"`
-	RemoveTokenNameOnFailure	bool     	`json:"removeTokenNameOnError,omitempty"`
-	TimestampUnix     			bool     	`json:"timestampUnix,omitempty"`
-	WhitelistIPs				[]string 	`yaml:"whitelistIPs,omitempty"`
-	DetailedLogs           		bool     	`json:"detailedLogs,omitempty"`
+	AuthenticationHeader		bool		`json:"authenticationHeader,omitempty"`
+	AuthenticationHeaderName	string		`json:"authenticationHeaderName,omitempty"`
+	AuthenticationErrorMsg		string		`json:"authenticationErrorMsg,omitempty"`
+	BearerHeader				bool		`json:"bearerHeader,omitempty"`
+	BearerHeaderName			string		`json:"bearerHeaderName,omitempty"`
+	Tokens						[]string	`json:"tokens,omitempty"`
+	PermissiveMode				bool		`json:"permissiveMode,omitempty"`
+	RemoveHeadersOnSuccess		bool		`json:"removeHeadersOnSuccess,omitempty"`
+	RemoveTokenNameOnFailure	bool		`json:"removeTokenNameOnError,omitempty"`
+	TimestampUnix				bool		`json:"timestampUnix,omitempty"`
+	WhitelistIPs				[]string	`yaml:"whitelistIPs,omitempty"`
+	DetailedLogs				bool		`json:"detailedLogs,omitempty"`
+	InternalErrorRoute			string		`json:"internalErrorRoute,omitempty"`
 }
 
 /*
@@ -97,11 +126,13 @@ func CreateConfig() *Config {
 		BearerHeader:             	true,
 		BearerHeaderName:         	"Authorization",
 		Tokens:                  	make([]string, 0),
+		PermissiveMode:				false,
 		RemoveHeadersOnSuccess:   	true,
 		RemoveTokenNameOnFailure:	false,
 		TimestampUnix:				false,
 		WhitelistIPs:				make([]string, 0),
 		DetailedLogs:				false,
+		InternalErrorRoute:			"",
 	}
 }
 
@@ -113,12 +144,18 @@ type KeyAuth struct {
 	bearerHeader             	bool
 	bearerHeaderName         	string
 	tokens                     	[]string
+	permissiveMode				bool
 	removeHeadersOnSuccess   	bool
 	removeTokenNameOnFailure	bool
 	timestampUnix				bool
 	whitelistIPs    			[]net.IP
 	detailedLogs           		bool
+	internalErrorRoute			string
 }
+
+/*
+	Strings > Slice
+*/
 
 func sliceString(a string, list []string) bool {
 	for _, b := range list {
@@ -130,14 +167,25 @@ func sliceString(a string, list []string) bool {
 	return false
 }
 
+/*
+	iP > Slice
+
+	returns true of ips match
+*/
+
 func sliceIp(a net.IP, list []net.IP) bool {
 	for _, b := range list {
 		if b.Equal(a) {
 			return true
 		}
 	}
+
 	return false
 }
+
+/*
+	IP > Parse
+*/
 
 func parseIP(addr string) (net.IP, error) {
 	ipAddress := net.ParseIP(addr)
@@ -151,6 +199,22 @@ func parseIP(addr string) (net.IP, error) {
 
 func New(ctx context.Context, next http.Handler, config *Config, name string) (http.Handler, error) {
 	fmt.Printf( Red + "[Aetherx-apikey]: " + Reset + "Starting Plugin " + Magenta + "%s" + Reset + "\n instance: " + Yellow + "%+v" + Reset + "\n ctx: " + Yellow + "%+v \n\n", name, *config, ctx)
+
+	// set output for logging
+	//logInfo.SetOutput(os.Stdout)
+
+	/*
+		@TODO		merge error logs
+	*/
+
+	logInfo.SetFlags(0)
+	logInfo.SetOutput(new(logWriter))
+
+	logErr.SetFlags(0)
+	logErr.SetOutput(new(logWriter))
+
+	logWarn.SetFlags(0)
+	logWarn.SetOutput(new(logWriter))
 
 	/*
 		Ip whitelist
@@ -166,7 +230,7 @@ func New(ctx context.Context, next http.Handler, config *Config, name string) (h
 
 		ipAddress := net.ParseIP(ipAddressEntry)
 		if ipAddress == nil {
-			fmt.Printf( Red + "[Aetherx-apikey]: " + Reset + "whitelistIPs whitelist contains %s" + Red + "%s" + Reset, "invalid ip address")
+			logInfo.Printf(Reset + "whitelistIPs whitelist contains %s" + Red + "%s" + Reset, "invalid ip address")
 		}
 		whitelistIPs = append(whitelistIPs, ipAddress)
 	}
@@ -199,11 +263,13 @@ func New(ctx context.Context, next http.Handler, config *Config, name string) (h
 		bearerHeader:             	config.BearerHeader,
 		bearerHeaderName:         	config.BearerHeaderName,
 		tokens:                  	config.Tokens,
+		permissiveMode:				config.PermissiveMode,
 		removeHeadersOnSuccess:   	config.RemoveHeadersOnSuccess,
 		removeTokenNameOnFailure:	config.RemoveTokenNameOnFailure,
 		timestampUnix:   			config.TimestampUnix,
 		whitelistIPs:				whitelistIPs,
 		detailedLogs:				config.DetailedLogs,
+		internalErrorRoute:			config.InternalErrorRoute,
 	}, nil
 }
 
@@ -251,9 +317,30 @@ func bearer(token string, validTokens []string) bool {
 	return contains(extractedToken, validTokens)
 }
 
+/*
+	Permissive Mode
+
+	allows the request to pass even if no valid key is provided
+*/
+
+func (ka *KeyAuth) permissiveOk(rw http.ResponseWriter, req *http.Request) {
+	logWarn.Printf(Reset + "Permissive Mode enabled, no valid credentials found. Allowing request anyway: " + Red + "\"%s\"" + Reset, req.URL)
+
+	req.RequestURI = req.URL.RequestURI()
+	ka.next.ServeHTTP(rw, req)
+}
+
+/*
+	Serve
+*/
+
 func (ka *KeyAuth) ServeHTTP(rw http.ResponseWriter, req *http.Request) {
 
 	reqIPAddr, err := ka.collectRemoteIP(req)
+
+	for _, ipAddress := range reqIPAddr {
+		logInfo.Printf(Reset + "Initializing new request " + Yellow + "%s" + Reset + " for url " + Yellow + "%s" + Reset, ipAddress, req.URL)
+	}
 
 	/*
 		Authentication Header > check for valid token
@@ -302,14 +389,16 @@ func (ka *KeyAuth) ServeHTTP(rw http.ResponseWriter, req *http.Request) {
 	*/
 
 	if len(ka.whitelistIPs) > 0 {
-		fmt.Printf( Red + "[Aetherx-apikey]: " + Reset + "IPs specified in setting " + Magenta + "%s" + Reset, "whitelistIPs")
+
+		logInfo.Printf(Reset + "Whitelist IP check " + Green + "%s" + Reset, "enabled")
 
 		for _, ipAddress := range reqIPAddr {
 
-			fmt.Printf( Red + "[Aetherx-apikey]: " + Reset + "Checking IP for whitelist access " + Magenta + "%s" + Reset, ipAddress)
+			logInfo.Printf(Reset + "Whitelist IP check on address: " + Magenta + "%s" + Reset, ipAddress)
 
 			if sliceIp(*ipAddress, ka.whitelistIPs) {
-				fmt.Printf( Red + "[Aetherx-apikey]: " + Reset + "Allowing whitelisted IP " + Magenta + "%s" + Reset + " to bypass apikey", ipAddress)
+				logInfo.Printf(Reset + "Allowing whitelisted IP " + Magenta + "%s" + Reset + " to bypass apikey", ipAddress)
+
 				req.Header.Del(ka.authenticationHeaderName)
 				req.Header.Del(ka.bearerHeaderName)
 				ka.next.ServeHTTP(rw, req)
@@ -350,6 +439,15 @@ func (ka *KeyAuth) ServeHTTP(rw http.ResponseWriter, req *http.Request) {
 		now = strconv.Itoa(ts)
 		// int - 
     }
+
+	/*
+		Allows you to use a "Dry-run" to pass no matter what even if no valid token was provided
+	*/
+
+	if ka.permissiveMode {
+		ka.permissiveOk(rw, req)
+		return
+	}
 
 	/*
 		Determine Auth Method & return response
@@ -401,12 +499,7 @@ func (ka *KeyAuth) ServeHTTP(rw http.ResponseWriter, req *http.Request) {
 	*/
 
 	if err := json.NewEncoder(rw).Encode(response); err != nil {
-
-		/*
-			Response can't be written > log error
-		*/
-		
-		fmt.Printf( Red + "[Aetherx-apikey]: " + Reset + "Erroneous response due to invalid api token: " + Red + "%s" + Reset, err.Error())
+		logErr.Printf(Reset + "Erroneous response due to invalid api token: " + Red + "%s" + Reset, err.Error())
 	}
 }
 
