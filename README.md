@@ -215,6 +215,7 @@ This plugin accepts the following parameters:
 | <sub>`removeTokenNameOnFailure`</sub> | <sub>Don't display name of token in unsuccessful error message</sub> | <sub>false</sub> | <sub>bool</sub> | <sub>⭕ Optional</sub> |
 | <sub>`timestampUnix`</sub> | <sub>Display datetime in Unix timestamp instead of UnixDate</sub> | <sub>false</sub> | <sub>bool</sub> | <sub>⭕ Optional</sub> |
 | <sub>`whitelistIPs`</sub> | <sub>A list of IP blocks that will bypass the api-token check</sub> | <sub>[]</sub> | <sub>[]string</sub> | <sub>⭕ Optional</sub> |
+| <sub>`permissiveMode`</sub> | <sub>Execute a dry-run, allows access even if a token is invalid</sub> | <sub>false</sub> | <sub>bool</sub> | <sub>⭕ Optional</sub> |
 
 <br />
 
