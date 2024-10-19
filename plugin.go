@@ -105,8 +105,8 @@ type Config struct {
 	InternalErrorRoute			string		`json:"internalErrorRoute,omitempty"`
 	Tokens						[]string	`json:"tokens,omitempty"`
 	WhitelistIPs				[]string	`yaml:"whitelistIPs,omitempty"`
-	RegexAllow 					[]string 	`json:"regexAllow,omitempty"`
-	RegexDeny					[]string 	`json:"regexDeny,omitempty"`
+	AgentAllow 					[]string 	`json:"agentAllow,omitempty"`
+	AgentDeny					[]string 	`json:"agentDeny,omitempty"`
 }
 
 /*
@@ -142,8 +142,8 @@ func CreateConfig() *Config {
 		InternalErrorRoute:			"",
 		Tokens:                  	make([]string, 0),
 		WhitelistIPs:				make([]string, 0),
-		RegexAllow: 				make([]string, 0),
-		RegexDeny: 					make([]string, 0),
+		AgentAllow: 				make([]string, 0),
+		AgentDeny: 					make([]string, 0),
 	}
 }
 
@@ -236,22 +236,22 @@ func New(ctx context.Context, next http.Handler, config *Config, name string) (h
 		allows you to filter out user-agents based on configured regex rules
 	*/
 
-	regexpsAllow := make([]*regexp.Regexp, len(config.RegexAllow))
-	regexpsDeny := make([]*regexp.Regexp, len(config.RegexDeny))
+	regexpsAllow := make([]*regexp.Regexp, len(config.AgentAllow))
+	regexpsDeny := make([]*regexp.Regexp, len(config.AgentDeny))
 
-	for i, regex := range config.RegexAllow {
+	for i, regex := range config.AgentAllow {
 		re, err := regexp.Compile(regex)
 		if err != nil {
-			return nil, fmt.Errorf("error compiling regexAllow %q: %w", regex, err)
+			return nil, logErr.Printf(Reset + "Erroneous useragent in deny list using regex: " + Red + "%q" + Reset + " Error: " + Red + "%w" + Reset, regex, err)
 		}
 
 		regexpsAllow[i] = re
 	}
 
-	for i, regex := range config.RegexDeny {
+	for i, regex := range config.AgentDeny {
 		re, err := regexp.Compile(regex)
 		if err != nil {
-			return nil, fmt.Errorf("error compiling regex %q: %w", regex, err)
+			return nil, logErr.Printf(Reset + "Erroneous useragent in deny list using regex: " + Red + "%q" + Reset + " Error: " + Red + "%w" + Reset, regex, err)
 		}
 
 		regexpsDeny[i] = re
@@ -271,7 +271,7 @@ func New(ctx context.Context, next http.Handler, config *Config, name string) (h
 
 		ipAddress := net.ParseIP(ipAddressEntry)
 		if ipAddress == nil {
-			logInfo.Printf(Reset + "whitelistIPs whitelist contains %s" + Red + "%s" + Reset, "invalid ip address")
+			logErr.Printf(Reset + "Whistlist contains invalid IP")
 		}
 		whitelistIPs = append(whitelistIPs, ipAddress)
 	}
@@ -281,7 +281,7 @@ func New(ctx context.Context, next http.Handler, config *Config, name string) (h
 	*/
 
 	if len(config.Tokens) == 0 {
-		return nil, fmt.Errorf("Must specify at least one valid api token in plugin configurations")
+		return nil, logErr.Printf(Reset + "Must specify at least one valid API token within plugin configurations" + Reset)
 	}
 
 	/*
@@ -289,7 +289,7 @@ func New(ctx context.Context, next http.Handler, config *Config, name string) (h
 	*/
 
 	if !config.AuthenticationHeader && !config.BearerHeader {
-		return nil, fmt.Errorf("Must specify either authenticationHeader or bearerHeader in dynamic configuration")
+		return nil, logErr.Printf(Reset + "Must specify at least one valid API token method within plugin configurations, pick " + Yellow + "authenticationHeader" + Reset + " or " + Yellow + "bearerHeader" + Reset)
 	}
 
 	/*
