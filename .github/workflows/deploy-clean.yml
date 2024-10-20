@@ -94,7 +94,7 @@ jobs:
     cleanup:
         runs-on: ubuntu-latest
         permissions: write-all
-
+  
         steps:
             - name: >-
                 ⚙️ Deployments › Clean
@@ -103,4 +103,4 @@ jobs:
                   token: ${{ secrets.SELF_TOKEN_CL }}
                   environment: orion
                   onlyRemoveDeployments: true
-                  delay: "500"
+                  delay: "1000"
