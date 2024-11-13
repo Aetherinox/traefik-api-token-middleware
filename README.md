@@ -87,18 +87,36 @@ This Traefik middleware allows you to secure certain routes behind a request hea
 ## How It Works
 This middleware offers you the ability to restrict certain containers being routed through Traefik. You can restrict a container to be inaccessible unless a user does one of the following:
 - Has a whitelisted IP address
-- Provides a valid request header value
+- Provides a valid request header value: `X-API-TOKEN`
 - Uses a valid useragent when accessing that container through their browser.
 
 <br />
 
 When enabling multiple ways to access the container, remember that the options are _**One OR the other**_. 
 
+<br />
+
 This means that if you whitelist a user's IP address, and also specify a useragent which is allowed to access your container; the user does NOT need to satisfy both requirements. 
+
+<br />
 
 They either need to be using a whitelisted IP when making their connection, OR their useragent must be a particular value.
 
+<br />
+
 In other words, meeting one of multiple provided options, satisfies ALL options and grants the user permission to the container.
+
+<br />
+
+This ensures that if you have a vital container behind your security measures and you have an incident where your whitelisted IP address changes; you have a backup method to re-gain access.
+
+<br />
+
+If you opt to require a request header for `X-API-TOKEN`, you should change the default header name to something else and not the default value. This ensures that outside users cannot start guessing your token.
+
+```yml
+   authenticationHeaderName: X-CUSTOM-TOKEN-NAME
+```
 
 <br />
 
