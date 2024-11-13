@@ -40,6 +40,7 @@ This Traefik middleware allows you to secure certain routes behind a request hea
 
 <br />
 
+- [How It Works](#how-it-works)
 - [Configuration](#configuration)
   - [Static File](#static-file)
     - [File (YAML)](#file-yaml)
@@ -76,6 +77,28 @@ This Traefik middleware allows you to secure certain routes behind a request hea
     - [File (YAML)](#file-yaml-3)
     - [File (TOML)](#file-toml-3)
 - [Contributors ✨](#contributors-)
+
+<br />
+
+---
+
+<br />
+
+## How It Works
+This middleware offers you the ability to restrict certain containers being routed through Traefik. You can restrict a container to be inaccessible unless a user does one of the following:
+- Has a whitelisted IP address
+- Provides a valid request header value
+- Uses a valid useragent when accessing that container through their browser.
+
+<br />
+
+When enabling multiple ways to access the container, remember that the options are _**One OR the other**_. 
+
+This means that if you whitelist a user's IP address, and also specify a useragent which is allowed to access your container; the user does NOT need to satisfy both requirements. 
+
+They either need to be using a whitelisted IP when making their connection, OR their useragent must be a particular value.
+
+In other words, meeting one of multiple provided options, satisfies ALL options and grants the user permission to the container.
 
 <br />
 
@@ -831,7 +854,11 @@ Want to help but can't write code?
 
 <br />
 
+<div align="center">
+
 ![Alt](https://repobeats.axiom.co/api/embed/3a528b94b5433fa1f9763340435c6071716e7dca.svg "analytics image")
+
+</div>
 
 <br />
 
