@@ -1,7 +1,7 @@
 ﻿displayName: API Key & Token Middleware
 type: middleware
 iconPath: .assets/logo.png
-import: github.com/Aetherinox/traefik-api-token-middleware
+import: github.com/aetherinox/traefik-api-token-middleware
 summary: "Integrate API tokens into the request header to allow restricted access. Supports IP whitelisting."
 
 testData:
